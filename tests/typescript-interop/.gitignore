@@ -1,0 +1,11 @@
+node_modules/
+*.log
+debug-*.js
+debug-*.ts
+debug-*.go
+intercept-*.go
+test-*.js
+test-*.ts
+!test-go-server.ts
+*.go
+!go-client-test.go
