@@ -24,9 +24,21 @@ server := mcp.NewMCPServer(
     mcp.WithLogging(),
 )
 
-// Initialize with stdio transport
+// Initialize with transport (choose one):
+
+// Option 1: Stdio transport (for process-based servers)
 ctx := context.Background()
 err := server.CreateWithStdio(ctx)
+
+// Option 2: SSE transport (dual endpoints: SSE + HTTP POST)
+// err := server.CreateWithSSE(ctx, "http://localhost:8080/events", "http://localhost:8080/send")
+
+// Option 3: Streamable HTTP transport (single endpoint)
+// err := server.CreateWithStreamableHTTP(ctx, "http://localhost:8080/mcp")
+
+// Option 4: Custom transport
+// err := server.SetTransport(ctx, customTransport)
+
 if err != nil {
     log.Fatal(err)
 }
@@ -150,3 +162,45 @@ nativeServer.RegisterTool("fast-tool", "Fast tool", schema, nativeHandler)
 ```
 
 This allows you to migrate incrementally while taking advantage of the performance benefits.
+
+## 🚀 Transport Support
+
+The compatibility layer supports all transport types available in the high-performance SDK:
+
+### **Stdio Transport**
+```go
+server := mcp.NewMCPServer("my-server", "1.0.0")
+err := server.CreateWithStdio(ctx)
+```
+- **Best for**: Process-based servers, command-line tools
+- **Features**: Non-blocking I/O, separate read/write goroutines
+
+### **SSE Transport** 
+```go
+server := mcp.NewMCPServer("my-server", "1.0.0")
+err := server.CreateWithSSE(ctx, 
+    "http://localhost:8080/events",  // SSE endpoint for receiving
+    "http://localhost:8080/send")    // HTTP POST endpoint for sending
+```
+- **Best for**: Real-time bidirectional communication with SSE
+- **Features**: Dual endpoints, SSE for receiving + HTTP POST for sending
+- **Use case**: When you need SSE streaming with request/response capability
+
+### **Streamable HTTP Transport**
+```go
+server := mcp.NewMCPServer("my-server", "1.0.0")
+err := server.CreateWithStreamableHTTP(ctx, "http://localhost:8080/mcp")
+```
+- **Best for**: HTTP-based MCP with streaming support
+- **Features**: Single endpoint, streamable HTTP protocol
+- **Use case**: Standard HTTP MCP with enhanced streaming capabilities
+
+### **Custom Transport**
+```go
+server := mcp.NewMCPServer("my-server", "1.0.0")
+err := server.SetTransport(ctx, myCustomTransport)
+```
+- **Best for**: Specialized protocols, custom networking
+- **Features**: Full control over transport implementation
+
+All transports provide the same high-performance benefits including worker pools, request correlation, and concurrent processing.

@@ -227,6 +227,71 @@ func (m *MockTransport) Stats() interface{} {
 }
 
 func TestServerIntegration(t *testing.T) {
+	t.Run("StdioTransport", func(t *testing.T) {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		
+		server := NewMCPServer("test-server", "1.0.0")
+		
+		err := server.CreateWithStdio(ctx)
+		require.NoError(t, err)
+		
+		err = server.Start()
+		require.NoError(t, err)
+		defer server.Close()
+		
+		underlying := server.GetUnderlying()
+		assert.NotNil(t, underlying)
+	})
+	
+	t.Run("SSETransport", func(t *testing.T) {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		
+		server := NewMCPServer("test-server", "1.0.0")
+		
+		err := server.CreateWithSSE(ctx, "http://localhost:8080/events", "http://localhost:8080/send")
+		require.NoError(t, err)
+		
+		underlying := server.GetUnderlying()
+		assert.NotNil(t, underlying)
+		
+		// Note: Don't start SSE server in test to avoid port conflicts
+		defer server.Close()
+	})
+	
+	t.Run("StreamableHTTPTransport", func(t *testing.T) {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		
+		server := NewMCPServer("test-server", "1.0.0")
+		
+		err := server.CreateWithStreamableHTTP(ctx, "http://localhost:8081/mcp")
+		require.NoError(t, err)
+		
+		underlying := server.GetUnderlying()
+		assert.NotNil(t, underlying)
+		
+		// Note: Don't start HTTP server in test to avoid port conflicts
+		defer server.Close()
+	})
+	
+	t.Run("CustomTransport", func(t *testing.T) {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		
+		transport := NewMockTransport()
+		server := NewMCPServer("test-server", "1.0.0")
+		
+		err := server.SetTransport(ctx, transport)
+		require.NoError(t, err)
+		
+		underlying := server.GetUnderlying()
+		assert.NotNil(t, underlying)
+		
+		defer server.Close()
+	})
+
 	t.Run("ResourceRegistration", func(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()

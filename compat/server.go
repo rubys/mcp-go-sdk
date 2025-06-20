@@ -136,6 +136,38 @@ func (s *MCPServer) CreateWithStdio(ctx context.Context) error {
 	return s.SetTransport(ctx, stdioTransport)
 }
 
+// CreateWithSSE creates a server with SSE transport (dual endpoints)
+func (s *MCPServer) CreateWithSSE(ctx context.Context, sseEndpoint, httpEndpoint string) error {
+	sseTransport, err := transport.NewSSETransport(ctx, transport.SSEConfig{
+		SSEEndpoint:    sseEndpoint,   // SSE endpoint for receiving messages
+		HTTPEndpoint:   httpEndpoint,  // HTTP POST endpoint for sending messages
+		RequestTimeout: s.config.requestTimeout,
+		MessageBuffer:  100,
+		MaxReconnects:  10,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to create SSE transport: %w", err)
+	}
+	
+	return s.SetTransport(ctx, sseTransport)
+}
+
+// CreateWithStreamableHTTP creates a server with streamable HTTP transport (single endpoint)
+func (s *MCPServer) CreateWithStreamableHTTP(ctx context.Context, endpoint string) error {
+	streamTransport, err := transport.NewStreamableHTTPTransport(ctx, transport.StreamableHTTPConfig{
+		ClientEndpoint:        endpoint,  // Single endpoint for streamable HTTP
+		RequestTimeout:        s.config.requestTimeout,
+		MaxConcurrentRequests: s.config.maxConcurrentRequests,
+		ConnectionPoolSize:    20,
+		MessageBuffer:         100,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to create streamable HTTP transport: %w", err)
+	}
+	
+	return s.SetTransport(ctx, streamTransport)
+}
+
 // ResourceHandlerFunc matches mark3labs signature
 type ResourceHandlerFunc func(ctx context.Context, request ResourceRequest) (ResourceResponse, error)
 

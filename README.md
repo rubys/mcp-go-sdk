@@ -31,7 +31,8 @@ A high-performance, **concurrency-first** Go implementation of the [Model Contex
 
 ### **Transport Flexibility**
 - **Stdio Transport**: Non-blocking stdio communication for process-based servers
-- **HTTP Transport**: Full HTTP client/server support with concurrent connection handling
+- **SSE Transport**: Dual-endpoint (SSE + HTTP POST) for real-time bidirectional communication
+- **Streamable HTTP Transport**: Single-endpoint streamable HTTP protocol
 - **Pluggable Interface**: Easy to add custom transport implementations
 
 ## 📦 Project Structure
@@ -45,6 +46,9 @@ go-sdk/
 ├── internal/         # Internal JSON-RPC message handling
 ├── compat/           # mark3labs/mcp-go compatibility layer
 ├── examples/         # Example implementations and demos
+│   ├── compat_migration/  # Stdio migration example
+│   ├── sse_migration/     # SSE transport example
+│   └── stdio_server/      # Native API server example
 └── tests/           # Comprehensive test suite including concurrency tests
 ```
 
