@@ -13,7 +13,7 @@ A high-performance, **concurrency-first** Go implementation of the [Model Contex
 
 ### **High Performance**
 - **Worker pools**: Configurable concurrency limits for optimal resource utilization
-- **Connection pooling**: HTTP transport with intelligent connection reuse
+- **Connection pooling**: SSE and Streamable HTTP transports with intelligent connection reuse
 - **Caching**: Resource content caching with TTL for reduced latency
 - **Statistics**: Built-in performance monitoring and metrics
 
@@ -41,7 +41,7 @@ A high-performance, **concurrency-first** Go implementation of the [Model Contex
 go-sdk/
 ├── client/           # MCP client implementation
 ├── server/           # MCP server implementation with registries
-├── transport/        # Transport layer implementations (stdio, HTTP)
+├── transport/        # Transport layer implementations (stdio, SSE, streamable HTTP)
 ├── shared/           # Common types and utilities
 ├── internal/         # Internal JSON-RPC message handling
 ├── compat/           # mark3labs/mcp-go compatibility layer
@@ -192,10 +192,11 @@ See [compat/README.md](compat/README.md) for complete migration guide.
 - **Buffered I/O**: Configurable buffer sizes for optimal performance
 - **Graceful shutdown**: Clean termination with proper resource cleanup
 
-#### HTTP Transport
+#### SSE & Streamable HTTP Transports
 - **Connection pooling**: Reuse connections for better performance
 - **Concurrent requests**: Multiple simultaneous HTTP requests
 - **Keep-alive**: Persistent connections with configurable timeouts
+- **Event streaming**: Real-time communication via Server-Sent Events
 
 ### **Server Components**
 #### Resource Registry
@@ -330,7 +331,7 @@ The SDK provides robust error handling for concurrent scenarios:
 - **[Stdio Server](examples/stdio_server/)**: Complete MCP server with stdio transport and TypeScript compatibility
 - **[Client Example](examples/client_example/)**: Demonstrates concurrent client operations
 - **[TypeScript Interop Tests](tests/typescript-interop/)**: Comprehensive compatibility test suite
-- **[HTTP Server](examples/http_server/)**: HTTP-based MCP server (coming soon)
+- **[Migration Examples](examples/)**: Compatibility layer examples for stdio and SSE transports
 
 ## 🤝 Contributing
 
