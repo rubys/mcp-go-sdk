@@ -458,6 +458,7 @@ func (s *Server) handleToolsCall(ctx context.Context, params interface{}) (inter
 	var req struct {
 		Name      string                 `json:"name"`
 		Arguments map[string]interface{} `json:"arguments"`
+		Meta      map[string]interface{} `json:"_meta,omitempty"`
 	}
 
 	if err := s.unmarshalParams(params, &req); err != nil {
@@ -465,6 +466,19 @@ func (s *Server) handleToolsCall(ctx context.Context, params interface{}) (inter
 			Code:    -32602,
 			Message: "Invalid params",
 		}
+	}
+
+	// Extract progress token from metadata if present
+	var progressToken interface{}
+	if req.Meta != nil {
+		if token, exists := req.Meta["progressToken"]; exists {
+			progressToken = token
+		}
+	}
+
+	// Add progress token to context for handlers to access
+	if progressToken != nil {
+		ctx = context.WithValue(ctx, "progressToken", progressToken)
 	}
 
 	s.toolMu.RLock()
@@ -554,6 +568,11 @@ func (s *Server) unmarshalParams(params interface{}, dest interface{}) error {
 	}
 
 	return json.Unmarshal(data, dest)
+}
+
+// SendNotification sends a notification to the client
+func (s *Server) SendNotification(method string, params interface{}) error {
+	return s.transport.SendNotification(method, params)
 }
 
 // Close gracefully shuts down the server

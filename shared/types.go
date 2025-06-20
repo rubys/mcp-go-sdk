@@ -367,3 +367,19 @@ type PromptMessage struct {
 
 // LoggingLevel represents logging level for compatibility
 type LoggingLevel = LogLevel
+
+// Progress notification support
+// ProgressNotification represents a progress notification following MCP spec
+type ProgressNotification struct {
+	JSONRPC string        `json:"jsonrpc"`
+	Method  string        `json:"method"`
+	Params  ProgressParams `json:"params"`
+}
+
+// ProgressParams represents the parameters of a progress notification per MCP spec
+type ProgressParams struct {
+	ProgressToken interface{} `json:"progressToken"`
+	Progress      int         `json:"progress"`
+	Total         *int        `json:"total,omitempty"`
+	Message       string      `json:"message,omitempty"`
+}

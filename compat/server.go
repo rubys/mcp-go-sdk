@@ -305,3 +305,13 @@ func (s *MCPServer) Close() error {
 func (s *MCPServer) GetUnderlying() *server.Server {
 	return s.underlying
 }
+
+// SendProgressNotification sends a progress notification to the client
+func (s *MCPServer) SendProgressNotification(notification shared.ProgressNotification) error {
+	if s.underlying == nil {
+		return fmt.Errorf("server not initialized")
+	}
+	
+	// Send notification via the underlying server
+	return s.underlying.SendNotification(notification.Method, notification.Params)
+}
