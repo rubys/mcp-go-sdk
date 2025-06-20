@@ -8,7 +8,7 @@ This package provides a compatibility layer that mimics the mark3labs/mcp-go API
 - **Type-Safe Arguments**: Strongly typed tool argument definitions
 - **Functional Options**: WithXXX configuration patterns
 - **Drop-in Replacement**: Minimal code changes required for migration
-- **High Performance**: 10x performance benefits with familiar API
+- **High Performance**: Leverage the underlying SDK's performance advantages
 
 ## Usage
 

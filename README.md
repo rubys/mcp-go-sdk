@@ -27,7 +27,7 @@ A high-performance, **concurrency-first** Go implementation of the [Model Contex
 - **mark3labs/mcp-go Compatible**: Drop-in replacement with familiar fluent API
 - **Import Alias Support**: Use `import mcp "github.com/rubys/mcp-go-sdk/compat"`
 - **Minimal Migration**: Change import + add transport initialization
-- **Performance Gains**: 10x faster while maintaining API compatibility
+- **Performance Gains**: Benefit from this SDK's 10x advantage over TypeScript SDK
 
 ### **Transport Flexibility**
 - **Stdio Transport**: Non-blocking stdio communication for process-based servers
@@ -172,7 +172,7 @@ server.AddTool(mcp.NewTool("calc", mcp.WithNumber("a", mcp.Required())), handler
 
 ### **Migration Benefits**
 - **Familiar API**: Same fluent builder patterns
-- **10x Performance**: Concurrency-first implementation  
+- **High Performance**: Leverages this SDK's concurrency-first implementation
 - **Type Safety**: Strongly typed tool arguments
 - **Drop-in Replacement**: Minimal code changes required
 

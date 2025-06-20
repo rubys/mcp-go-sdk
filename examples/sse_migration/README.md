@@ -6,7 +6,7 @@ This example demonstrates using the compatibility layer with SSE transport, show
 
 - **Dual Endpoints**: SSE for receiving messages, HTTP POST for sending
 - **mark3labs/mcp-go Compatible API**: Same fluent builder patterns
-- **High Performance**: 10x faster with Go concurrency
+- **High Performance**: Leverages Go SDK's concurrency advantages
 - **Real-time Communication**: Server-Sent Events with bidirectional capability
 
 ## Usage
