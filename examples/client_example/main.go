@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/modelcontextprotocol/go-sdk/client"
+	"github.com/modelcontextprotocol/go-sdk/shared"
 	"github.com/modelcontextprotocol/go-sdk/transport"
 )
 
@@ -55,16 +56,16 @@ func main() {
 
 	// Create MCP client
 	clientConfig := client.ClientConfig{
-		Name:    "Go MCP Client Example",
-		Version: "1.0.0",
+		ClientInfo: shared.ClientInfo{
+			Name:    "Go MCP Client Example",
+			Version: "1.0.0",
+		},
+		Capabilities: shared.ClientCapabilities{},
 	}
 
-	mcpClient := client.NewClient(ctx, clientTransport, clientConfig)
-
-	// Initialize the connection
-	fmt.Println("Initializing MCP connection...")
-	if err := mcpClient.Initialize(); err != nil {
-		log.Fatalf("Failed to initialize client: %v", err)
+	mcpClient, err := client.NewClient(ctx, clientTransport, clientConfig)
+	if err != nil {
+		log.Fatalf("Failed to create client: %v", err)
 	}
 
 	fmt.Println("✅ MCP client initialized successfully!")
@@ -101,18 +102,19 @@ func main() {
 func testConcurrentListing(client *client.Client) {
 	var wg sync.WaitGroup
 	const numConcurrent = 10
+	ctx := context.Background()
 
 	// Concurrent resource listing
 	wg.Add(numConcurrent)
 	for i := 0; i < numConcurrent; i++ {
 		go func(i int) {
 			defer wg.Done()
-			resources, err := client.ListResources()
+			resources, err := client.ListResources(ctx)
 			if err != nil {
 				fmt.Printf("Error listing resources %d: %v\n", i, err)
 				return
 			}
-			fmt.Printf("  Resources %d: Found %d resources\n", i, len(resources))
+			fmt.Printf("  Resources %d: Found %d resources\n", i, len(resources.Resources))
 		}(i)
 	}
 
@@ -121,12 +123,12 @@ func testConcurrentListing(client *client.Client) {
 	for i := 0; i < numConcurrent; i++ {
 		go func(i int) {
 			defer wg.Done()
-			tools, err := client.ListTools()
+			tools, err := client.ListTools(ctx)
 			if err != nil {
 				fmt.Printf("Error listing tools %d: %v\n", i, err)
 				return
 			}
-			fmt.Printf("  Tools %d: Found %d tools\n", i, len(tools))
+			fmt.Printf("  Tools %d: Found %d tools\n", i, len(tools.Tools))
 		}(i)
 	}
 
@@ -135,12 +137,12 @@ func testConcurrentListing(client *client.Client) {
 	for i := 0; i < numConcurrent; i++ {
 		go func(i int) {
 			defer wg.Done()
-			prompts, err := client.ListPrompts()
+			prompts, err := client.ListPrompts(ctx)
 			if err != nil {
 				fmt.Printf("Error listing prompts %d: %v\n", i, err)
 				return
 			}
-			fmt.Printf("  Prompts %d: Found %d prompts\n", i, len(prompts))
+			fmt.Printf("  Prompts %d: Found %d prompts\n", i, len(prompts.Prompts))
 		}(i)
 	}
 
@@ -157,12 +159,12 @@ func testConcurrentResourceReads(client *client.Client) {
 		wg.Add(1)
 		go func(i int) {
 			defer wg.Done()
-			content, err := client.ReadResource("file://example.txt")
+			content, err := client.ReadResource(context.Background(), "file://example.txt")
 			if err != nil {
 				fmt.Printf("Error reading resource %d: %v\n", i, err)
 				return
 			}
-			fmt.Printf("  Read %d: Got %d content blocks\n", i, len(content))
+			fmt.Printf("  Read %d: Got %d content blocks\n", i, len(content.Contents))
 		}(i)
 	}
 
@@ -181,15 +183,18 @@ func testConcurrentToolCalls(client *client.Client) {
 		wg.Add(1)
 		go func(i int) {
 			defer wg.Done()
-			args := map[string]interface{}{
-				"text": fmt.Sprintf("Concurrent call #%d", i),
+			request := shared.CallToolRequest{
+				Name: "echo",
+				Arguments: map[string]interface{}{
+					"text": fmt.Sprintf("Concurrent call #%d", i),
+				},
 			}
-			content, err := client.CallTool("echo", args)
+			content, err := client.CallTool(context.Background(), request)
 			if err != nil {
 				fmt.Printf("Error calling tool %d: %v\n", i, err)
 				return
 			}
-			fmt.Printf("  Tool call %d: Got %d content blocks\n", i, len(content))
+			fmt.Printf("  Tool call %d: Got %d content blocks\n", i, len(content.Content))
 		}(i)
 	}
 
@@ -208,10 +213,13 @@ func testConcurrentPromptRequests(client *client.Client) {
 		wg.Add(1)
 		go func(i int) {
 			defer wg.Done()
-			args := map[string]interface{}{
-				"name": fmt.Sprintf("User%d", i),
+			request := shared.GetPromptRequest{
+				Name: "greeting",
+				Arguments: map[string]interface{}{
+					"name": fmt.Sprintf("User%d", i),
+				},
 			}
-			promptResult, err := client.GetPrompt("greeting", args)
+			promptResult, err := client.GetPrompt(context.Background(), request)
 			if err != nil {
 				fmt.Printf("Error getting prompt %d: %v\n", i, err)
 				return
@@ -239,31 +247,37 @@ func testMixedConcurrentOperations(client *client.Client) {
 			switch i % 4 {
 			case 0:
 				// Resource read
-				_, err := client.ReadResource("file://example.txt")
+				_, err := client.ReadResource(context.Background(), "file://example.txt")
 				if err != nil {
 					fmt.Printf("Mixed %d (resource): %v\n", i, err)
 				}
 			case 1:
 				// Tool call
-				args := map[string]interface{}{
-					"text": fmt.Sprintf("Mixed operation %d", i),
+				request := shared.CallToolRequest{
+					Name: "echo",
+					Arguments: map[string]interface{}{
+						"text": fmt.Sprintf("Mixed operation %d", i),
+					},
 				}
-				_, err := client.CallTool("echo", args)
+				_, err := client.CallTool(context.Background(), request)
 				if err != nil {
 					fmt.Printf("Mixed %d (tool): %v\n", i, err)
 				}
 			case 2:
 				// Prompt request
-				args := map[string]interface{}{
-					"name": fmt.Sprintf("MixedUser%d", i),
+				request := shared.GetPromptRequest{
+					Name: "greeting",
+					Arguments: map[string]interface{}{
+						"name": fmt.Sprintf("MixedUser%d", i),
+					},
 				}
-				_, err := client.GetPrompt("greeting", args)
+				_, err := client.GetPrompt(context.Background(), request)
 				if err != nil {
 					fmt.Printf("Mixed %d (prompt): %v\n", i, err)
 				}
 			case 3:
 				// List operation
-				_, err := client.ListResources()
+				_, err := client.ListResources(context.Background())
 				if err != nil {
 					fmt.Printf("Mixed %d (list): %v\n", i, err)
 				}

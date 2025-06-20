@@ -285,3 +285,85 @@ func ParseMessageResult(result interface{}, dest interface{}) error {
 
 	return nil
 }
+
+// Additional types for client compatibility
+
+// ClientInfo represents client implementation information
+type ClientInfo struct {
+	Name    string `json:"name"`
+	Version string `json:"version"`
+}
+
+// ServerInfo represents server implementation information  
+type ServerInfo struct {
+	Name    string `json:"name"`
+	Version string `json:"version"`
+}
+
+// Result types for MCP operations
+
+// ListResourcesResult represents the result of listing resources
+type ListResourcesResult struct {
+	Resources []Resource `json:"resources"`
+}
+
+// ReadResourceParams represents parameters for reading a resource
+type ReadResourceParams struct {
+	URI string `json:"uri"`
+}
+
+// ReadResourceResult represents the result of reading a resource
+type ReadResourceResult struct {
+	Contents []ResourceContent `json:"contents"`
+}
+
+// ResourceContent represents the content of a resource
+type ResourceContent struct {
+	URI      string      `json:"uri"`
+	MimeType string      `json:"mimeType"`
+	Text     string      `json:"text,omitempty"`
+	Blob     string      `json:"blob,omitempty"`
+}
+
+// ListToolsResult represents the result of listing tools
+type ListToolsResult struct {
+	Tools []Tool `json:"tools"`
+}
+
+// CallToolRequest represents a tool call request
+type CallToolRequest struct {
+	Name      string                 `json:"name"`
+	Arguments map[string]interface{} `json:"arguments,omitempty"`
+}
+
+// CallToolResult represents the result of calling a tool
+type CallToolResult struct {
+	Content []Content `json:"content"`
+	IsError bool      `json:"isError,omitempty"`
+}
+
+// ListPromptsResult represents the result of listing prompts
+type ListPromptsResult struct {
+	Prompts []Prompt `json:"prompts"`
+}
+
+// GetPromptRequest represents a prompt request
+type GetPromptRequest struct {
+	Name      string                 `json:"name"`
+	Arguments map[string]interface{} `json:"arguments,omitempty"`
+}
+
+// GetPromptResult represents the result of getting a prompt
+type GetPromptResult struct {
+	Description string          `json:"description,omitempty"`
+	Messages    []PromptMessage `json:"messages"`
+}
+
+// PromptMessage represents a message in a prompt
+type PromptMessage struct {
+	Role    string      `json:"role"`
+	Content interface{} `json:"content"` // Can be Content or []Content
+}
+
+// LoggingLevel represents logging level for compatibility
+type LoggingLevel = LogLevel

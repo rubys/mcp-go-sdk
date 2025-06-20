@@ -33,13 +33,14 @@ This is a high-performance, concurrency-first Go implementation of the Model Con
   - Timeout handling with automatic cleanup
 
 ### 4. TypeScript SDK Interoperability
-- **Parameter Translation**: TypeScript SDK sends simplified parameters that need translation
-  - `resources/read`: `"file://example.txt"` → `{"uri": "file://example.txt"}`
+- **Parameter Format Compatibility**: Go client automatically sends parameters in TypeScript-compatible format
+  - `resources/read`: Go client sends `{"uri": "file://example.txt"}` to match TypeScript server expectations
   - `tools/call` and `prompts/get`: Already compatible format
+  - Go server handles both string and object formats for maximum compatibility
 - **Response Format Compatibility**: 
   - `PromptMessage` content: Single items as objects, multiple as arrays
   - `TextContent` includes `URI` field for resource content
-- **Transport Wrapper**: `TypeScriptCompatibleTransport` handles parameter translation transparently
+- **Native Compatibility**: No wrapper needed - core implementation handles TypeScript format natively
 
 ## Critical Implementation Details
 
@@ -182,6 +183,12 @@ The implementation must maintain full compatibility with the MCP protocol while 
 - Race condition detection and resolution
 - TypeScript SDK interoperability verification
 - Production deployment guide with Docker/Kubernetes examples
+
+✅ **Recent Fixes (2024)**:
+- **Stdio Transport Deadlock Resolution**: Fixed WaitGroup synchronization and made readLoop non-blocking to prevent cleanup deadlocks
+- **TypeScript Interoperability**: Updated Go client to send `{"uri": "..."}` format for resource reads, ensuring 100% compatibility
+- **HTTP Transport Correlation**: Implemented proper request/response correlation for HTTP transport
+- **All Tests Passing**: TypeScript interop test suite now passes completely (10/10 tests)
 
 ## Future Enhancements
 

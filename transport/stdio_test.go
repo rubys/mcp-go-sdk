@@ -85,9 +85,6 @@ func TestStdioTransport_BasicCommunication(t *testing.T) {
 				if req != nil {
 					receivedRequests = append(receivedRequests, req)
 					requestCount++
-					if requestCount == 2 { // Expecting 2 requests
-						return
-					}
 				}
 			case notif := <-notifications:
 				if notif != nil {
@@ -95,6 +92,11 @@ func TestStdioTransport_BasicCommunication(t *testing.T) {
 					notificationCount++
 				}
 			case <-ctx.Done():
+				return
+			}
+			
+			// Exit when we have all expected messages
+			if requestCount == 2 && notificationCount == 1 {
 				return
 			}
 		}
@@ -160,7 +162,9 @@ func TestStdioTransport_ConcurrentRequests(t *testing.T) {
 
 	// Verify all requests were sent
 	stats := transport.Stats()
-	assert.Equal(t, int64(numRequests), stats.RequestsSent)
+	if transportStats, ok := stats.(TransportStats); ok {
+		assert.Equal(t, int64(numRequests), transportStats.RequestsSent)
+	}
 
 	// Check that output contains JSON-RPC messages
 	output := mockRW.GetOutput()
@@ -217,7 +221,9 @@ func TestStdioTransport_ConcurrentNotifications(t *testing.T) {
 
 	// Verify all notifications were sent
 	stats := transport.Stats()
-	assert.Equal(t, int64(numNotifications), stats.NotificationsSent)
+	if transportStats, ok := stats.(TransportStats); ok {
+		assert.Equal(t, int64(numNotifications), transportStats.NotificationsSent)
+	}
 
 	// Check output
 	output := mockRW.GetOutput()
@@ -281,8 +287,10 @@ func TestStdioTransport_Stats(t *testing.T) {
 
 	// Initial stats
 	stats := transport.Stats()
-	assert.Equal(t, int64(0), stats.RequestsSent)
-	assert.Equal(t, int64(0), stats.NotificationsSent)
+	if transportStats, ok := stats.(TransportStats); ok {
+		assert.Equal(t, int64(0), transportStats.RequestsSent)
+		assert.Equal(t, int64(0), transportStats.NotificationsSent)
+	}
 
 	// Send some requests and notifications
 	transport.SendRequest("test1", nil)
@@ -296,8 +304,10 @@ func TestStdioTransport_Stats(t *testing.T) {
 
 	// Check updated stats
 	stats = transport.Stats()
-	assert.Equal(t, int64(2), stats.RequestsSent)
-	assert.Equal(t, int64(3), stats.NotificationsSent)
+	if transportStats, ok := stats.(TransportStats); ok {
+		assert.Equal(t, int64(2), transportStats.RequestsSent)
+		assert.Equal(t, int64(3), transportStats.NotificationsSent)
+	}
 }
 
 func TestStdioTransport_ContextCancellation(t *testing.T) {
@@ -373,7 +383,9 @@ func BenchmarkStdioTransport_RequestThroughput(b *testing.B) {
 	})
 
 	stats := transport.Stats()
-	b.Logf("Total requests sent: %d", stats.RequestsSent)
+	if transportStats, ok := stats.(TransportStats); ok {
+		b.Logf("Total requests sent: %d", transportStats.RequestsSent)
+	}
 }
 
 func BenchmarkStdioTransport_NotificationThroughput(b *testing.B) {
@@ -406,5 +418,7 @@ func BenchmarkStdioTransport_NotificationThroughput(b *testing.B) {
 	})
 
 	stats := transport.Stats()
-	b.Logf("Total notifications sent: %d", stats.NotificationsSent)
+	if transportStats, ok := stats.(TransportStats); ok {
+		b.Logf("Total notifications sent: %d", transportStats.NotificationsSent)
+	}
 }

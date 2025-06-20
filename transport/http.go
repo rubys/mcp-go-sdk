@@ -298,7 +298,7 @@ func (ht *HTTPTransport) Close() error {
 }
 
 // Stats returns transport statistics
-func (ht *HTTPTransport) Stats() HTTPTransportStats {
+func (ht *HTTPTransport) Stats() interface{} {
 	messageStats := ht.messageHandler.GetStats()
 	return HTTPTransportStats{
 		RequestsSent:      ht.requestsSent,

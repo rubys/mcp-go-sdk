@@ -19,7 +19,7 @@ A high-performance, **concurrency-first** Go implementation of the [Model Contex
 
 ### **TypeScript SDK Interoperability**
 - **100% Compatible**: Seamlessly works with TypeScript MCP clients and servers
-- **Parameter Translation**: Automatic translation between TypeScript and Go parameter formats
+- **Native Parameter Format Support**: Go client sends TypeScript-compatible parameters natively
 - **Response Format Compatibility**: Ensures responses match TypeScript SDK expectations
 - **Cross-Platform Testing**: Comprehensive interoperability test suite included
 
@@ -197,7 +197,7 @@ The Go SDK's concurrency-first design provides significant performance advantage
 ### **Interoperability**
 - **Cross-platform compatibility**: Works seamlessly with TypeScript MCP clients
 - **Protocol compliance**: 100% compatible with MCP specification
-- **Automatic parameter translation**: Handles TypeScript SDK parameter formats transparently
+- **Native parameter format support**: Go client sends TypeScript-compatible formats natively
 - **Response format matching**: Ensures responses meet TypeScript SDK expectations
 
 ## 🧪 Testing

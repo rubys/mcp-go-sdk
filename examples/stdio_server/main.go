@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"sync"
 	"syscall"
 	"time"
 
@@ -14,123 +13,6 @@ import (
 	"github.com/modelcontextprotocol/go-sdk/shared"
 	"github.com/modelcontextprotocol/go-sdk/transport"
 )
-
-// TypeScriptCompatibleTransport wraps a transport to translate TypeScript SDK parameter formats
-type TypeScriptCompatibleTransport struct {
-	baseTransport interface {
-		Channels() (<-chan *shared.Request, <-chan *shared.Notification)
-		SendResponse(id interface{}, result interface{}, err *shared.RPCError) error
-		Close() error
-	}
-	ctx                 context.Context
-	translatedReqChan   chan *shared.Request
-	translatedNotifChan chan *shared.Notification
-	wg                  sync.WaitGroup
-}
-
-func (t *TypeScriptCompatibleTransport) Channels() (<-chan *shared.Request, <-chan *shared.Notification) {
-	if t.translatedReqChan == nil {
-		t.translatedReqChan = make(chan *shared.Request, 100)
-		t.translatedNotifChan = make(chan *shared.Notification, 100)
-
-		originalReqs, originalNotifs := t.baseTransport.Channels()
-
-		// Start translation goroutines
-		t.wg.Add(2)
-
-		// Translate requests
-		go func() {
-			defer t.wg.Done()
-			defer close(t.translatedReqChan)
-			for {
-				select {
-				case req := <-originalReqs:
-					if req != nil {
-						translatedReq := t.translateRequest(req)
-						select {
-						case t.translatedReqChan <- translatedReq:
-						case <-t.ctx.Done():
-							return
-						}
-					}
-				case <-t.ctx.Done():
-					return
-				}
-			}
-		}()
-
-		// Pass through notifications unchanged
-		go func() {
-			defer t.wg.Done()
-			defer close(t.translatedNotifChan)
-			for {
-				select {
-				case notif := <-originalNotifs:
-					if notif != nil {
-						select {
-						case t.translatedNotifChan <- notif:
-						case <-t.ctx.Done():
-							return
-						}
-					}
-				case <-t.ctx.Done():
-					return
-				}
-			}
-		}()
-	}
-
-	return t.translatedReqChan, t.translatedNotifChan
-}
-
-func (t *TypeScriptCompatibleTransport) translateRequest(req *shared.Request) *shared.Request {
-	// Create a copy of the request
-	translatedReq := &shared.Request{
-		ID:     req.ID,
-		Method: req.Method,
-		Params: req.Params,
-	}
-
-	// Translate TypeScript SDK parameter formats to standard MCP formats
-	switch req.Method {
-	case "resources/read":
-		// TypeScript SDK: params = "file://example.txt"
-		// Standard MCP: params = {"uri": "file://example.txt"}
-		if uriStr, ok := req.Params.(string); ok {
-			translatedReq.Params = map[string]interface{}{
-				"uri": uriStr,
-			}
-		}
-	case "tools/call":
-		// TypeScript SDK already sends correct format: {"name": "...", "arguments": {...}}
-		// No translation needed
-	case "prompts/get":
-		// TypeScript SDK already sends correct format: {"name": "...", "arguments": {...}}
-		// No translation needed
-	}
-
-	return translatedReq
-}
-
-func (t *TypeScriptCompatibleTransport) SendResponse(id interface{}, result interface{}, err *shared.RPCError) error {
-	return t.baseTransport.SendResponse(id, result, err)
-}
-
-func (t *TypeScriptCompatibleTransport) SendNotification(method string, params interface{}) error {
-	// Check if base transport has SendNotification method
-	if notifier, ok := t.baseTransport.(interface {
-		SendNotification(string, interface{}) error
-	}); ok {
-		return notifier.SendNotification(method, params)
-	}
-	// If not supported, return nil (ignore notifications)
-	return nil
-}
-
-func (t *TypeScriptCompatibleTransport) Close() error {
-	t.wg.Wait()
-	return t.baseTransport.Close()
-}
 
 func main() {
 	// Create context that can be cancelled
@@ -156,12 +38,6 @@ func main() {
 	}
 	defer baseTransport.Close()
 
-	// Wrap transport with TypeScript SDK parameter translation
-	wrappedTransport := &TypeScriptCompatibleTransport{
-		baseTransport: baseTransport,
-		ctx:           ctx,
-	}
-
 	// Create server with concurrency configuration
 	serverConfig := server.ServerConfig{
 		Name:                  "Example Go MCP Server",
@@ -182,7 +58,7 @@ func main() {
 		},
 	}
 
-	mcpServer := server.NewServer(ctx, wrappedTransport, serverConfig)
+	mcpServer := server.NewServer(ctx, baseTransport, serverConfig)
 
 	// Register example resource handler
 	mcpServer.RegisterResource(

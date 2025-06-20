@@ -396,29 +396,38 @@ func (s *Server) handleResourcesList(ctx context.Context, params interface{}) (i
 }
 
 func (s *Server) handleResourcesRead(ctx context.Context, params interface{}) (interface{}, *shared.RPCError) {
-	var req struct {
-		URI string `json:"uri"`
-	}
+	var uri string
 
-	if err := s.unmarshalParams(params, &req); err != nil {
-		return nil, &shared.RPCError{
-			Code:    -32602,
-			Message: "Invalid params",
+	// Handle both string format (TypeScript SDK) and object format
+	if uriStr, ok := params.(string); ok {
+		// Direct string format: "file://example.txt"
+		uri = uriStr
+	} else {
+		// Object format: {"uri": "file://example.txt"}
+		var req struct {
+			URI string `json:"uri"`
 		}
+		if err := s.unmarshalParams(params, &req); err != nil {
+			return nil, &shared.RPCError{
+				Code:    -32602,
+				Message: "Invalid params: expected string URI or object with uri field",
+			}
+		}
+		uri = req.URI
 	}
 
 	s.resourceMu.RLock()
-	handler, exists := s.resourceHandlers[req.URI]
+	handler, exists := s.resourceHandlers[uri]
 	s.resourceMu.RUnlock()
 
 	if !exists {
 		return nil, &shared.RPCError{
 			Code:    -32602,
-			Message: fmt.Sprintf("Resource not found: %s", req.URI),
+			Message: fmt.Sprintf("Resource not found: %s", uri),
 		}
 	}
 
-	contents, err := handler(ctx, req.URI)
+	contents, err := handler(ctx, uri)
 	if err != nil {
 		return nil, &shared.RPCError{
 			Code:    -32603,

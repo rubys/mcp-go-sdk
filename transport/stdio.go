@@ -130,8 +130,14 @@ func NewStdioTransport(ctx context.Context, config StdioConfig) (*StdioTransport
 	}()
 
 	// Start I/O goroutines
-	go transport.readLoop()
-	go transport.writeLoop()
+	go func() {
+		defer transport.wg.Done()
+		transport.readLoop()
+	}()
+	go func() {
+		defer transport.wg.Done()
+		transport.writeLoop()
+	}()
 
 	return transport, nil
 }
@@ -161,48 +167,73 @@ func (st *StdioTransport) SendResponse(id interface{}, result interface{}, err *
 
 // readLoop continuously reads from stdin in a separate goroutine
 func (st *StdioTransport) readLoop() {
-	defer st.wg.Done()
-
 	scanner := bufio.NewScanner(st.reader)
 	scanner.Buffer(make([]byte, st.readBufferSize), st.readBufferSize)
 
+	// Use a goroutine to handle the blocking scanner.Scan()
+	scanChan := make(chan bool)
+	lineChan := make(chan []byte)
+	errChan := make(chan error)
+
+	go func() {
+		defer func() {
+			close(scanChan)
+			close(lineChan)
+			close(errChan)
+		}()
+		
+		for scanner.Scan() {
+			line := scanner.Bytes()
+			if len(line) > 0 {
+				// Make a copy since scanner reuses the buffer
+				data := make([]byte, len(line))
+				copy(data, line)
+				
+				select {
+				case lineChan <- data:
+				case <-st.ctx.Done():
+					return
+				}
+			}
+		}
+		
+		if err := scanner.Err(); err != nil {
+			select {
+			case errChan <- err:
+			case <-st.ctx.Done():
+			}
+		}
+	}()
+
 	for {
 		select {
+		case line, ok := <-lineChan:
+			if !ok {
+				return // Scanner finished
+			}
+			atomic.AddInt64(&st.linesRead, 1)
+			atomic.AddInt64(&st.bytesRead, int64(len(line)))
+
+			select {
+			case st.incomingChan <- line:
+			case <-st.ctx.Done():
+				return
+			}
+			
+		case err, ok := <-errChan:
+			if ok && err != nil && err != io.EOF {
+				// Handle read error - could send error notification
+			}
+			return
+			
 		case <-st.ctx.Done():
 			return
-		default:
-			if scanner.Scan() {
-				line := scanner.Bytes()
-				if len(line) > 0 {
-					// Make a copy since scanner reuses the buffer
-					data := make([]byte, len(line))
-					copy(data, line)
-
-					atomic.AddInt64(&st.linesRead, 1)
-					atomic.AddInt64(&st.bytesRead, int64(len(data)))
-
-					select {
-					case st.incomingChan <- data:
-					case <-st.ctx.Done():
-						return
-					}
-				}
-			} else {
-				if err := scanner.Err(); err != nil {
-					// Handle read error - could send error notification
-					if err != io.EOF {
-						// Log error or send error notification
-					}
-				}
-				return // EOF or error
-			}
 		}
 	}
 }
 
 // writeLoop continuously writes to stdout in a separate goroutine
 func (st *StdioTransport) writeLoop() {
-	defer st.wg.Done()
 
 	writer := bufio.NewWriterSize(st.writer, st.writeBufferSize)
 	ticker := time.NewTicker(st.flushInterval)
@@ -326,7 +357,7 @@ func (st *StdioTransport) Close() error {
 }
 
 // Stats returns transport statistics
-func (st *StdioTransport) Stats() TransportStats {
+func (st *StdioTransport) Stats() interface{} {
 	messageStats := st.messageHandler.GetStats()
 	return TransportStats{
 		BytesRead:         atomic.LoadInt64(&st.bytesRead),

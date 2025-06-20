@@ -56,21 +56,15 @@ Total: 9/9 tests passing (362ms total duration)
 func main() {
     ctx := context.Background()
     
-    // Production-optimized configuration
-    baseTransport, _ := transport.NewStdioTransport(ctx, transport.StdioConfig{
+    // Production-optimized configuration with native TypeScript compatibility
+    transport, _ := transport.NewStdioTransport(ctx, transport.StdioConfig{
         RequestTimeout: 30 * time.Second,
         MessageBuffer:  1000,        // Large buffer for high load
         ReadBufferSize: 128 * 1024,  // 128KB read buffer
         WriteBufferSize: 128 * 1024, // 128KB write buffer
     })
     
-    // Wrap with TypeScript compatibility layer for cross-platform support
-    wrappedTransport := &TypeScriptCompatibleTransport{
-        baseTransport: baseTransport,
-        ctx:           ctx,
-    }
-    
-    server := server.NewServer(ctx, wrappedTransport, server.ServerConfig{
+    server := server.NewServer(ctx, transport, server.ServerConfig{
         Name:                  "Production MCP Server",
         Version:               "1.0.0",
         MaxConcurrentRequests: 500,   // Handle 500 concurrent requests
