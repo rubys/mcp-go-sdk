@@ -10,8 +10,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/modelcontextprotocol/go-sdk/internal"
-	"github.com/modelcontextprotocol/go-sdk/shared"
+	"github.com/rubys/mcp-go-sdk/internal"
+	"github.com/rubys/mcp-go-sdk/shared"
 )
 
 // HTTPTransport implements HTTP transport with concurrent connection handling

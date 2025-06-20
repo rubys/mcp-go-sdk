@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/modelcontextprotocol/go-sdk/shared"
+	"github.com/rubys/mcp-go-sdk/shared"
 )
 
 // HandlerFunc represents a generic handler function

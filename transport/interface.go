@@ -1,7 +1,7 @@
 package transport
 
 import (
-	"github.com/modelcontextprotocol/go-sdk/shared"
+	"github.com/rubys/mcp-go-sdk/shared"
 )
 
 // Transport interface defines the common interface for all MCP transports

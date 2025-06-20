@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/modelcontextprotocol/go-sdk/shared"
+	"github.com/rubys/mcp-go-sdk/shared"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -277,9 +277,14 @@ func TestStdioTransport_ErrorScenarios(t *testing.T) {
 		// Give more time for async write to happen and fail
 		time.Sleep(200 * time.Millisecond)
 
-		// Verify writes
-		assert.Equal(t, 2, errorWriter.successfulWrites)
-		assert.Equal(t, 1, errorWriter.failedWrites)
+		// Verify writes with proper synchronization
+		errorWriter.mu.Lock()
+		successfulWrites := errorWriter.successfulWrites
+		failedWrites := errorWriter.failedWrites
+		errorWriter.mu.Unlock()
+		
+		assert.Equal(t, 2, successfulWrites)
+		assert.Equal(t, 1, failedWrites)
 	})
 
 	t.Run("RequestTimeout", func(t *testing.T) {

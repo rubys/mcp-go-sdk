@@ -9,7 +9,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/modelcontextprotocol/go-sdk/shared"
+	"github.com/rubys/mcp-go-sdk/shared"
 )
 
 func main() {

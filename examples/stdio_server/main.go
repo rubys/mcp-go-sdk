@@ -9,9 +9,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/modelcontextprotocol/go-sdk/server"
-	"github.com/modelcontextprotocol/go-sdk/shared"
-	"github.com/modelcontextprotocol/go-sdk/transport"
+	"github.com/rubys/mcp-go-sdk/server"
+	"github.com/rubys/mcp-go-sdk/shared"
+	"github.com/rubys/mcp-go-sdk/transport"
 )
 
 func main() {

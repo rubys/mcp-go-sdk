@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/modelcontextprotocol/go-sdk/shared"
-	"github.com/modelcontextprotocol/go-sdk/transport"
+	"github.com/rubys/mcp-go-sdk/shared"
+	"github.com/rubys/mcp-go-sdk/transport"
 )
 
 // Client represents an MCP client

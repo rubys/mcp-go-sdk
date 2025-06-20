@@ -8,9 +8,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/modelcontextprotocol/go-sdk/client"
-	"github.com/modelcontextprotocol/go-sdk/shared"
-	"github.com/modelcontextprotocol/go-sdk/transport"
+	"github.com/rubys/mcp-go-sdk/client"
+	"github.com/rubys/mcp-go-sdk/shared"
+	"github.com/rubys/mcp-go-sdk/transport"
 )
 
 func main() {

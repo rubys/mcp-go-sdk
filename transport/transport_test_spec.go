@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/modelcontextprotocol/go-sdk/shared"
+	"github.com/rubys/mcp-go-sdk/shared"
 )
 
 // TransportTestSuite defines the common test interface that all transports must satisfy

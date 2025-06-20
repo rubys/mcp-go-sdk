@@ -13,8 +13,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/modelcontextprotocol/go-sdk/internal"
-	"github.com/modelcontextprotocol/go-sdk/shared"
+	"github.com/rubys/mcp-go-sdk/internal"
+	"github.com/rubys/mcp-go-sdk/shared"
 )
 
 // StreamableHTTPTransport implements the Streamable HTTP transport with SSE support
