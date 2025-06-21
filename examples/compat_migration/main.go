@@ -9,8 +9,6 @@ import (
 	"syscall"
 
 	mcp "github.com/rubys/mcp-go-sdk/compat"
-	"github.com/rubys/mcp-go-sdk/server"
-	"github.com/rubys/mcp-go-sdk/shared"
 )
 
 func main() {
@@ -153,11 +151,10 @@ func handleReadmeResource(ctx context.Context, req mcp.ResourceRequest) (mcp.Res
 	log.Printf("Reading resource: %s", req.URI)
 	
 	return mcp.ResourceResponse{
-		Contents: []shared.Content{
-			shared.TextContent{
-				Type: shared.ContentTypeText,
+		Contents: []mcp.Content{
+			mcp.TextContent{
+				Type: mcp.ContentTypeText,
 				Text: "# MCP Go SDK Compatibility Layer\n\nThis demonstrates the compatibility layer that provides mark3labs/mcp-go API while leveraging high-performance Go concurrency.",
-				URI:  req.URI,
 			},
 		},
 	}, nil
@@ -167,11 +164,10 @@ func handleConfigResource(ctx context.Context, req mcp.ResourceRequest) (mcp.Res
 	log.Printf("Reading config: %s", req.URI)
 	
 	return mcp.ResourceResponse{
-		Contents: []shared.Content{
-			shared.TextContent{
-				Type: shared.ContentTypeText,
+		Contents: []mcp.Content{
+			mcp.TextContent{
+				Type: mcp.ContentTypeText,
 				Text: `{"server": {"name": "compat-example", "version": "1.0.0", "performance": "10x"}}`,
-				URI:  req.URI,
 			},
 		},
 	}, nil
@@ -203,9 +199,9 @@ func handleCalculatorTool(ctx context.Context, req mcp.ToolRequest) (mcp.ToolRes
 	log.Printf("Calculator: %f %s %f = %f", a, operation, b, result)
 	
 	return mcp.ToolResponse{
-		Content: []shared.Content{
-			shared.TextContent{
-				Type: shared.ContentTypeText,
+		Content: []mcp.Content{
+			mcp.TextContent{
+				Type: mcp.ContentTypeText,
 				Text: fmt.Sprintf("Result: %f %s %f = %f", a, operation, b, result),
 			},
 		},
@@ -227,9 +223,9 @@ func handleEchoTool(ctx context.Context, req mcp.ToolRequest) (mcp.ToolResponse,
 	log.Printf("Echo: %s (uppercase: %v)", text, uppercase)
 	
 	return mcp.ToolResponse{
-		Content: []shared.Content{
-			shared.TextContent{
-				Type: shared.ContentTypeText,
+		Content: []mcp.Content{
+			mcp.TextContent{
+				Type: mcp.ContentTypeText,
 				Text: fmt.Sprintf("Echo: %s", text),
 			},
 		},
@@ -257,12 +253,12 @@ func handleGreetingPrompt(ctx context.Context, req mcp.PromptRequest) (mcp.Promp
 	
 	// Note: Compatibility layer expects array of messages
 	return mcp.PromptResponse{
-		Messages: []server.PromptMessage{
+		Messages: []mcp.PromptMessage{
 			{
 				Role: "user",
-				Content: []shared.Content{
-					shared.TextContent{
-						Type: shared.ContentTypeText,
+				Content: []mcp.Content{
+					mcp.TextContent{
+						Type: mcp.ContentTypeText,
 						Text: greeting,
 					},
 				},

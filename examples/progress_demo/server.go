@@ -7,7 +7,6 @@ import (
 	"time"
 
 	mcp "github.com/rubys/mcp-go-sdk/compat"
-	"github.com/rubys/mcp-go-sdk/shared"
 )
 
 func main() {
@@ -35,9 +34,9 @@ func main() {
 		func(ctx context.Context, request mcp.ToolRequest) (mcp.ToolResponse, error) {
 			currentTime := time.Now().Format("2006-01-02 15:04:05 MST")
 			return mcp.ToolResponse{
-				Content: []shared.Content{
-					shared.TextContent{
-						Type: shared.ContentTypeText,
+				Content: []mcp.Content{
+					mcp.TextContent{
+						Type: mcp.ContentTypeText,
 						Text: fmt.Sprintf("Current time: %s", currentTime),
 					},
 				},
@@ -61,7 +60,6 @@ func main() {
 				progressToken = "default-progress-token"
 			}
 			
-			log.Printf("Progress token from request metadata: %v (type: %T)", progressToken, progressToken)
 
 			// Send progress notifications every second for 10 seconds
 			ticker := time.NewTicker(1 * time.Second)
@@ -72,9 +70,9 @@ func main() {
 				case <-ctx.Done():
 					// Tool was cancelled
 					return mcp.ToolResponse{
-						Content: []shared.Content{
-							shared.TextContent{
-								Type: shared.ContentTypeText,
+						Content: []mcp.Content{
+							mcp.TextContent{
+								Type: mcp.ContentTypeText,
 								Text: "Tool was cancelled",
 							},
 						},
@@ -82,20 +80,16 @@ func main() {
 				case <-ticker.C:
 					// Send progress notification
 					if progressToken != nil {
-						log.Printf("Sending progress notification %d/10 with token: %v", i, progressToken)
 						total := 10
-						progress := shared.ProgressNotification{
-							JSONRPC: "2.0",
-							Method:  "notifications/progress",
-							Params: shared.ProgressParams{
+						progress := mcp.ProgressNotification{
+							Method: "notifications/progress",
+							Params: mcp.ProgressParams{
 								ProgressToken: progressToken,
 								Progress:      i,
 								Total:         &total,
 								Message:       fmt.Sprintf("Processing step %d of %d", i, total),
 							},
 						}
-						
-						log.Printf("Sending progress notification with full details: token=%v, progress=%d, total=%d", progressToken, i, total)
 						
 						// Send progress notification via server
 						err := server.SendProgressNotification(progress)
@@ -107,9 +101,9 @@ func main() {
 			}
 
 			return mcp.ToolResponse{
-				Content: []shared.Content{
-					shared.TextContent{
-						Type: shared.ContentTypeText,
+				Content: []mcp.Content{
+					mcp.TextContent{
+						Type: mcp.ContentTypeText,
 						Text: "Done",
 					},
 				},

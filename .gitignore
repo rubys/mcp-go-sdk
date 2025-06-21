@@ -8,6 +8,15 @@
 *.out
 go.work
 
+# Example binaries
+examples/*/server
+examples/*/client
+examples/*/main
+examples/*/mcp-server
+examples/progress_demo/progress_demo
+examples/compat_migration/compat_migration
+examples/sse_migration/sse_migration
+
 # OS files
 .DS_Store
 Thumbs.db

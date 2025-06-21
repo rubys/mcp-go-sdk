@@ -178,7 +178,7 @@ type ResourceRequest struct {
 
 // ResourceResponse represents a resource response
 type ResourceResponse struct {
-	Contents []shared.Content
+	Contents []Content
 }
 
 // ToolHandlerFunc matches mark3labs signature
@@ -205,7 +205,7 @@ type RequestMeta struct {
 
 // ToolResponse represents a tool response
 type ToolResponse struct {
-	Content []shared.Content
+	Content []Content
 }
 
 // PromptHandlerFunc matches mark3labs signature
@@ -219,7 +219,7 @@ type PromptRequest struct {
 
 // PromptResponse represents a prompt response
 type PromptResponse struct {
-	Messages []server.PromptMessage
+	Messages []PromptMessage
 }
 
 // AddResource adds a resource with mark3labs-compatible API
@@ -235,7 +235,8 @@ func (s *MCPServer) AddResource(resource *Resource, handler ResourceHandlerFunc)
 		if err != nil {
 			return nil, err
 		}
-		return resp.Contents, nil
+		// Convert compat Content to shared Content
+		return convertToSharedContent(resp.Contents), nil
 	}
 	
 	s.underlying.RegisterResource(
@@ -275,7 +276,8 @@ func (s *MCPServer) AddTool(tool *Tool, handler ToolHandlerFunc) {
 		if err != nil {
 			return nil, err
 		}
-		return resp.Content, nil
+		// Convert compat Content to shared Content
+		return convertToSharedContent(resp.Content), nil
 	}
 	
 	s.underlying.RegisterTool(
@@ -302,7 +304,12 @@ func (s *MCPServer) AddPrompt(prompt *Prompt, handler PromptHandlerFunc) {
 		if len(resp.Messages) == 0 {
 			return server.PromptMessage{}, fmt.Errorf("no messages in prompt response")
 		}
-		return resp.Messages[0], nil
+		// Convert compat PromptMessage to server PromptMessage
+		compatMsg := resp.Messages[0]
+		return server.PromptMessage{
+			Role:    compatMsg.Role,
+			Content: convertToSharedContent(compatMsg.Content),
+		}, nil
 	}
 	
 	s.underlying.RegisterPrompt(
@@ -336,11 +343,48 @@ func (s *MCPServer) GetUnderlying() *server.Server {
 }
 
 // SendProgressNotification sends a progress notification to the client
-func (s *MCPServer) SendProgressNotification(notification shared.ProgressNotification) error {
+func (s *MCPServer) SendProgressNotification(notification ProgressNotification) error {
 	if s.underlying == nil {
 		return fmt.Errorf("server not initialized")
 	}
 	
 	// Send notification via the underlying server
 	return s.underlying.SendNotification(notification.Method, notification.Params)
+}
+
+// convertToSharedContent converts compat Content to shared Content
+func convertToSharedContent(compatContent []Content) []shared.Content {
+	if compatContent == nil {
+		return nil
+	}
+	
+	sharedContent := make([]shared.Content, len(compatContent))
+	for i, content := range compatContent {
+		switch c := content.(type) {
+		case TextContent:
+			sharedContent[i] = shared.TextContent{
+				Type: shared.ContentType(c.Type),
+				Text: c.Text,
+			}
+		case ImageContent:
+			sharedContent[i] = shared.ImageContent{
+				Type:     shared.ContentType(c.Type),
+				Data:     c.Data,
+				MimeType: c.MIMEType,
+			}
+		case ResourceContent:
+			// Convert resource content (simplified for now)
+			sharedContent[i] = shared.TextContent{
+				Type: shared.ContentTypeText,
+				Text: fmt.Sprintf("Resource: %s", c.Resource.uri),
+			}
+		default:
+			// Default to text content
+			sharedContent[i] = shared.TextContent{
+				Type: shared.ContentTypeText,
+				Text: fmt.Sprintf("%v", c),
+			}
+		}
+	}
+	return sharedContent
 }

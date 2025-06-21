@@ -68,10 +68,10 @@ async function demoWithCancellation() {
       const progressResult = await progressPromise;
       console.log('✅ Progress tool completed:', progressResult.content[0]);
     } catch (error: any) {
-      if (error.name === 'AbortError') {
+      if (error.name === 'AbortError' || abortController.signal.aborted) {
         console.log('✅ Successfully cancelled progress tool after 3 notifications');
       } else {
-        console.log('⚠️  Progress tool error:', error.message);
+        console.log('⚠️  Progress tool error:', error.message || error);
       }
     }
 

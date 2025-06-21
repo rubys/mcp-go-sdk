@@ -10,7 +10,6 @@ import (
 	"syscall"
 
 	mcp "github.com/rubys/mcp-go-sdk/compat"
-	"github.com/rubys/mcp-go-sdk/shared"
 )
 
 func main() {
@@ -103,11 +102,10 @@ func handleAPIResource(ctx context.Context, req mcp.ResourceRequest) (mcp.Resour
 	
 	// Simulate API call
 	return mcp.ResourceResponse{
-		Contents: []shared.Content{
-			shared.TextContent{
-				Type: shared.ContentTypeText,
+		Contents: []mcp.Content{
+			mcp.TextContent{
+				Type: mcp.ContentTypeText,
 				Text: `{"status": "success", "data": {"users": 1250, "active": 890}, "transport": "HTTP"}`,
-				URI:  req.URI,
 			},
 		},
 	}, nil
@@ -127,9 +125,9 @@ func handleWebhookTool(ctx context.Context, req mcp.ToolRequest) (mcp.ToolRespon
 	defer resp.Body.Close()
 	
 	return mcp.ToolResponse{
-		Content: []shared.Content{
-			shared.TextContent{
-				Type: shared.ContentTypeText,
+		Content: []mcp.Content{
+			mcp.TextContent{
+				Type: mcp.ContentTypeText,
 				Text: fmt.Sprintf("Webhook sent successfully to %s (status: %s)", url, resp.Status),
 			},
 		},

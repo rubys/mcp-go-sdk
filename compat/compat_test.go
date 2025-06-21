@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/rubys/mcp-go-sdk/shared"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/rubys/mcp-go-sdk/shared"
 )
 
 func TestResourceBuilder(t *testing.T) {
@@ -309,11 +309,10 @@ func TestServerIntegration(t *testing.T) {
 		
 		server.AddResource(resource, func(ctx context.Context, req ResourceRequest) (ResourceResponse, error) {
 			return ResourceResponse{
-				Contents: []shared.Content{
-					shared.TextContent{
-						Type: shared.ContentTypeText,
+				Contents: []Content{
+					TextContent{
+						Type: ContentTypeText,
 						Text: "test content",
-						URI:  req.URI,
 					},
 				},
 			}, nil
@@ -347,9 +346,9 @@ func TestServerIntegration(t *testing.T) {
 		server.AddTool(tool, func(ctx context.Context, req ToolRequest) (ToolResponse, error) {
 			input := req.Arguments["input"].(string)
 			return ToolResponse{
-				Content: []shared.Content{
-					shared.TextContent{
-						Type: shared.ContentTypeText,
+				Content: []Content{
+					TextContent{
+						Type: ContentTypeText,
 						Text: "Output: " + input,
 					},
 				},
