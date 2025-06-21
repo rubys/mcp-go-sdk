@@ -52,21 +52,16 @@ func main() {
 			mcp.WithString("progress_token"), // Optional by default
 		),
 		func(ctx context.Context, request mcp.ToolRequest) (mcp.ToolResponse, error) {
-			// Get the progress token from the request context
-			// The MCP SDK stores it in the request's _meta field
+			// Extract progress token from request metadata following MCP pattern
 			var progressToken interface{}
-			
-			// First check if we have a progress token from the context (if the compat layer supports it)
-			if token := ctx.Value("progressToken"); token != nil {
-				progressToken = token
-			} else if request.Arguments != nil {
-				// Fallback: check arguments for demo purposes
-				if token, ok := request.Arguments["progress_token"]; ok {
-					progressToken = token
-				}
+			if request.Params.Meta != nil && request.Params.Meta.ProgressToken != nil {
+				progressToken = request.Params.Meta.ProgressToken
+			}
+			if progressToken == nil {
+				progressToken = "default-progress-token"
 			}
 			
-			log.Printf("Progress token from request: %v (type: %T)", progressToken, progressToken)
+			log.Printf("Progress token from request metadata: %v (type: %T)", progressToken, progressToken)
 
 			// Send progress notifications every second for 10 seconds
 			ticker := time.NewTicker(1 * time.Second)

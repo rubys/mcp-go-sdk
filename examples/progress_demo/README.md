@@ -99,19 +99,15 @@ npx tsx client_with_cancellation.ts
    }
    ```
 
-3. **Progress Token Extraction** (`server/server.go`):
+3. **Progress Token Extraction** (compat layer pattern):
    ```go
-   // Extract progress token from request metadata
+   // Extract progress token from request metadata following MCP pattern
    var progressToken interface{}
-   if req.Meta != nil {
-       if token, exists := req.Meta["progressToken"]; exists {
-           progressToken = token
-       }
+   if request.Params.Meta != nil && request.Params.Meta.ProgressToken != nil {
+       progressToken = request.Params.Meta.ProgressToken
    }
-   
-   // Add to context for handlers
-   if progressToken != nil {
-       ctx = context.WithValue(ctx, "progressToken", progressToken)
+   if progressToken == nil {
+       progressToken = "default-progress-token"
    }
    ```
 

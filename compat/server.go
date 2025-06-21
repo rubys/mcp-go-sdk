@@ -188,6 +188,19 @@ type ToolHandlerFunc func(ctx context.Context, request ToolRequest) (ToolRespons
 type ToolRequest struct {
 	Name      string
 	Arguments map[string]interface{}
+	Params    ToolRequestParams
+}
+
+// ToolRequestParams represents the full parameters structure
+type ToolRequestParams struct {
+	Name      string                 `json:"name"`
+	Arguments map[string]interface{} `json:"arguments,omitempty"`
+	Meta      *RequestMeta           `json:"_meta,omitempty"`
+}
+
+// RequestMeta represents request metadata
+type RequestMeta struct {
+	ProgressToken interface{} `json:"progressToken,omitempty"`
 }
 
 // ToolResponse represents a tool response
@@ -241,7 +254,23 @@ func (s *MCPServer) AddTool(tool *Tool, handler ToolHandlerFunc) {
 	
 	// Convert mark3labs handler to native handler
 	nativeHandler := func(ctx context.Context, name string, arguments map[string]interface{}) ([]shared.Content, error) {
-		req := ToolRequest{Name: name, Arguments: arguments}
+		// Extract metadata from context if available
+		var meta *RequestMeta
+		if progressToken := ctx.Value("progressToken"); progressToken != nil {
+			meta = &RequestMeta{
+				ProgressToken: progressToken,
+			}
+		}
+		
+		req := ToolRequest{
+			Name:      name, 
+			Arguments: arguments,
+			Params: ToolRequestParams{
+				Name:      name,
+				Arguments: arguments,
+				Meta:      meta,
+			},
+		}
 		resp, err := handler(ctx, req)
 		if err != nil {
 			return nil, err
