@@ -328,6 +328,7 @@ The SDK provides robust error handling for concurrent scenarios:
 
 ## 🔗 Examples
 
+- **[Progress Demo](examples/progress_demo/)**: Complete TypeScript ↔ Go interoperability example with progress notifications and cancellation
 - **[Stdio Server](examples/stdio_server/)**: Complete MCP server with stdio transport and TypeScript compatibility
 - **[Client Example](examples/client_example/)**: Demonstrates concurrent client operations
 - **[TypeScript Interop Tests](tests/typescript-interop/)**: Comprehensive compatibility test suite
@@ -349,6 +350,7 @@ MIT License - see [LICENSE](LICENSE) file for details.
 ## 🙏 Acknowledgments
 
 - [Model Context Protocol](https://github.com/modelcontextprotocol/typescript-sdk) - Original TypeScript implementation
+- [mark3labs/mcp-go](https://github.com/mark3labs/mcp-go) - Popular Go MCP SDK that inspired our compatibility layer
 - Go community for excellent concurrency primitives and patterns
 
 ---
