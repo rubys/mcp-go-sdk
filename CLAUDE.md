@@ -103,9 +103,10 @@ cd tests/typescript-interop && npx tsx test-go-server.ts
 go-sdk/
 ├── client/         # Client-side implementation
 ├── server/         # Server-side implementation  
-├── transport/      # Transport implementations (stdio, HTTP)
+├── transport/      # Transport implementations (stdio, SSE, Streamable HTTP)
 ├── shared/         # Common types and utilities
 ├── internal/       # Internal packages (not for external use)
+├── compat/         # mark3labs/mcp-go compatibility layer
 ├── examples/       # Example implementations
 ├── tests/          # Integration and interoperability tests
 ├── PRODUCTION.md   # Production deployment guide
@@ -121,6 +122,16 @@ When implementing new features:
 3. **Include comprehensive tests including concurrency tests**
 4. **Update documentation with concurrency considerations**
 5. **Add examples demonstrating concurrent usage**
+
+## Compatibility Layer Guidelines
+
+When working with the mark3labs/mcp-go compatibility layer:
+
+1. **Use compat types in public APIs**: Always use `compat.Content`, `compat.ToolRequest`, etc. for user-facing interfaces
+2. **Convert internally**: Use `convertToSharedContent()` to bridge between compat and shared types
+3. **Maintain API consistency**: Follow mark3labs/mcp-go patterns exactly for seamless migration
+4. **Progress notifications**: Use `compat.ProgressNotification` with proper token handling
+5. **Examples should be self-contained**: Examples should import only the compat package, not shared
 
 ## Debugging Concurrent Code
 
@@ -162,6 +173,22 @@ pendingRequests map[interface{}]*PendingRequest
 mu sync.RWMutex
 ```
 
+### Compatibility Layer Pattern
+```go
+// Public API uses compat types
+type ToolHandlerFunc func(ctx context.Context, request ToolRequest) (ToolResponse, error)
+
+// Internal conversion to shared types
+nativeHandler := func(ctx context.Context, name string, arguments map[string]interface{}) ([]shared.Content, error) {
+    req := ToolRequest{Name: name, Arguments: arguments}
+    resp, err := handler(ctx, req)
+    if err != nil {
+        return nil, err
+    }
+    return convertToSharedContent(resp.Content), nil
+}
+```
+
 ## Integration with MCP Protocol
 
 The implementation must maintain full compatibility with the MCP protocol while leveraging Go's concurrency features. Key protocol methods:
@@ -189,6 +216,13 @@ The implementation must maintain full compatibility with the MCP protocol while 
 - **TypeScript Interoperability**: Updated Go client to send `{"uri": "..."}` format for resource reads, ensuring 100% compatibility
 - **HTTP Transport Correlation**: Implemented proper request/response correlation for HTTP transport
 - **All Tests Passing**: TypeScript interop test suite now passes completely (10/10 tests)
+
+✅ **mark3labs/mcp-go Compatibility Layer**:
+- **Complete API Compatibility**: Full fluent builder patterns matching mark3labs/mcp-go SDK
+- **Progress Notifications**: Native support for MCP progress notifications with proper token handling
+- **Self-Contained Types**: compat/types.go provides Content types independent of shared package
+- **Example Migration**: All examples use only compat API, demonstrating clean migration path
+- **Type Conversion**: Automatic conversion between compat and shared types internally
 
 ## Future Enhancements
 
