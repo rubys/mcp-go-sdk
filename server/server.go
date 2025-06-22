@@ -183,37 +183,115 @@ func (s *Server) Start() error {
 // RegisterResource registers a resource handler
 func (s *Server) RegisterResource(uri, name, description string, handler ResourceHandler) {
 	s.resourceMu.Lock()
-	defer s.resourceMu.Unlock()
 	s.resourceHandlers[uri] = handler
 	s.resourceMeta[uri] = shared.Resource{
 		URI:         uri,
 		Name:        name,
 		Description: description,
 	}
+	s.resourceMu.Unlock()
+	
+	// Send notification if resources list_changed capability is enabled
+	if s.capabilities.Resources != nil && s.capabilities.Resources.ListChanged {
+		s.SendNotification("notifications/resources/list_changed", nil)
+	}
+}
+
+// UnregisterResource removes a resource handler
+func (s *Server) UnregisterResource(uri string) bool {
+	s.resourceMu.Lock()
+	_, existsHandler := s.resourceHandlers[uri]
+	_, existsMeta := s.resourceMeta[uri]
+	if existsHandler || existsMeta {
+		delete(s.resourceHandlers, uri)
+		delete(s.resourceMeta, uri)
+	}
+	s.resourceMu.Unlock()
+	
+	if existsHandler || existsMeta {
+		// Send notification if resources list_changed capability is enabled
+		if s.capabilities.Resources != nil && s.capabilities.Resources.ListChanged {
+			s.SendNotification("notifications/resources/list_changed", nil)
+		}
+		return true
+	}
+	return false
 }
 
 // RegisterTool registers a tool handler
 func (s *Server) RegisterTool(name, description string, inputSchema map[string]interface{}, handler ToolHandler) {
 	s.toolMu.Lock()
-	defer s.toolMu.Unlock()
 	s.toolHandlers[name] = handler
 	s.toolMeta[name] = shared.Tool{
 		Name:        name,
 		Description: description,
 		InputSchema: inputSchema,
 	}
+	s.toolMu.Unlock()
+	
+	// Send notification if tools list_changed capability is enabled
+	if s.capabilities.Tools != nil && s.capabilities.Tools.ListChanged {
+		s.SendNotification("notifications/tools/list_changed", nil)
+	}
+}
+
+// UnregisterTool removes a tool handler
+func (s *Server) UnregisterTool(name string) bool {
+	s.toolMu.Lock()
+	_, existsHandler := s.toolHandlers[name]
+	_, existsMeta := s.toolMeta[name]
+	if existsHandler || existsMeta {
+		delete(s.toolHandlers, name)
+		delete(s.toolMeta, name)
+	}
+	s.toolMu.Unlock()
+	
+	if existsHandler || existsMeta {
+		// Send notification if tools list_changed capability is enabled
+		if s.capabilities.Tools != nil && s.capabilities.Tools.ListChanged {
+			s.SendNotification("notifications/tools/list_changed", nil)
+		}
+		return true
+	}
+	return false
 }
 
 // RegisterPrompt registers a prompt handler
 func (s *Server) RegisterPrompt(name, description string, arguments []shared.PromptArgument, handler PromptHandler) {
 	s.promptMu.Lock()
-	defer s.promptMu.Unlock()
 	s.promptHandlers[name] = handler
 	s.promptMeta[name] = shared.Prompt{
 		Name:        name,
 		Description: description,
 		Arguments:   arguments,
 	}
+	s.promptMu.Unlock()
+	
+	// Send notification if prompts list_changed capability is enabled
+	if s.capabilities.Prompts != nil && s.capabilities.Prompts.ListChanged {
+		s.SendNotification("notifications/prompts/list_changed", nil)
+	}
+}
+
+// UnregisterPrompt removes a prompt handler
+func (s *Server) UnregisterPrompt(name string) bool {
+	s.promptMu.Lock()
+	_, existsHandler := s.promptHandlers[name]
+	_, existsMeta := s.promptMeta[name]
+	if existsHandler || existsMeta {
+		delete(s.promptHandlers, name)
+		delete(s.promptMeta, name)
+	}
+	s.promptMu.Unlock()
+	
+	if existsHandler || existsMeta {
+		// Send notification if prompts list_changed capability is enabled
+		if s.capabilities.Prompts != nil && s.capabilities.Prompts.ListChanged {
+			s.SendNotification("notifications/prompts/list_changed", nil)
+		}
+		return true
+	}
+	return false
 }
 
 // RegisterHandler registers a custom request handler
