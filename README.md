@@ -32,7 +32,9 @@ A high-performance, **concurrency-first** Go implementation of the [Model Contex
 ### **Transport Flexibility**
 - **Stdio Transport**: Non-blocking stdio communication for process-based servers
 - **SSE Transport**: Dual-endpoint (SSE + HTTP POST) for real-time bidirectional communication
-- **Streamable HTTP Transport**: Single-endpoint streamable HTTP protocol
+- **Streamable HTTP Transport**: Single-endpoint streamable HTTP protocol with OAuth 2.0 support
+- **In-Process Transport**: Direct client-server communication for testing without network overhead
+- **OAuth 2.0 Authentication**: Full OAuth support with PKCE for secure HTTP transports
 - **Pluggable Interface**: Easy to add custom transport implementations
 
 ## 📦 Project Structure
@@ -41,7 +43,7 @@ A high-performance, **concurrency-first** Go implementation of the [Model Contex
 go-sdk/
 ├── client/           # MCP client implementation
 ├── server/           # MCP server implementation with registries
-├── transport/        # Transport layer implementations (stdio, SSE, streamable HTTP)
+├── transport/        # Transport layer implementations (stdio, SSE, streamable HTTP, in-process, OAuth)
 ├── shared/           # Common types and utilities
 ├── internal/         # Internal JSON-RPC message handling
 ├── compat/           # mark3labs/mcp-go compatibility layer
@@ -49,7 +51,7 @@ go-sdk/
 │   ├── compat_migration/  # Stdio migration example
 │   ├── sse_migration/     # SSE transport example
 │   └── stdio_server/      # Native API server example
-└── tests/           # Comprehensive test suite including concurrency tests
+└── tests/           # Comprehensive test suite including concurrency, OAuth, and interoperability tests
 ```
 
 ## 🏃 Quick Start
@@ -197,6 +199,7 @@ See [compat/README.md](compat/README.md) for complete migration guide.
 - **Concurrent requests**: Multiple simultaneous HTTP requests
 - **Keep-alive**: Persistent connections with configurable timeouts
 - **Event streaming**: Real-time communication via Server-Sent Events
+- **OAuth 2.0 Integration**: Secure authentication with PKCE support
 
 ### **Server Components**
 #### Resource Registry
@@ -261,11 +264,14 @@ cd tests/typescript-interop && npx tsx test-go-server.ts
 
 ### Test Coverage
 - **Concurrent request handling**: Multiple simultaneous requests
-- **Race condition detection**: Ensures thread safety
+- **Race condition detection**: Ensures thread safety with Go's race detector
+- **OAuth 2.0 authentication**: Complete OAuth flow testing with PKCE
+- **In-process transport**: Direct client-server communication testing
 - **Timeout scenarios**: Proper handling of timeouts and cancellation
 - **High load testing**: Performance under stress (961 req/sec throughput achieved)
 - **TypeScript interoperability**: Full compatibility with TypeScript MCP SDK
-- **Integration tests**: End-to-end functionality
+- **mark3labs compatibility**: Migration compatibility layer tests
+- **Integration tests**: End-to-end functionality across all transports
 
 ## 📈 Configuration
 

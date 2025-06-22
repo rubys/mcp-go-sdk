@@ -78,7 +78,7 @@ func TestStreamableHTTPTransport_BasicCommunication(t *testing.T) {
 		MaxReconnects:   3,
 	}
 
-	transport, err := NewStreamableHTTPTransport(ctx, config)
+	transport, err := NewStreamableHTTPTransportWithConfig(ctx, config)
 	require.NoError(t, err)
 	defer transport.Close()
 
@@ -178,7 +178,7 @@ func TestStreamableHTTPTransport_SSEReconnection(t *testing.T) {
 		MaxReconnects:   5,
 	}
 
-	transport, err := NewStreamableHTTPTransport(ctx, config)
+	transport, err := NewStreamableHTTPTransportWithConfig(ctx, config)
 	require.NoError(t, err)
 	defer transport.Close()
 
@@ -257,7 +257,7 @@ func TestStreamableHTTPTransport_ConcurrentRequests(t *testing.T) {
 		ConnectionPoolSize:    25,
 	}
 
-	transport, err := NewStreamableHTTPTransport(ctx, config)
+	transport, err := NewStreamableHTTPTransportWithConfig(ctx, config)
 	require.NoError(t, err)
 	defer transport.Close()
 
@@ -352,7 +352,7 @@ func TestStreamableHTTPTransport_SessionManagement(t *testing.T) {
 		RequestTimeout: 5 * time.Second,
 	}
 
-	transport, err := NewStreamableHTTPTransport(ctx, config)
+	transport, err := NewStreamableHTTPTransportWithConfig(ctx, config)
 	require.NoError(t, err)
 	defer transport.Close()
 
@@ -419,7 +419,7 @@ func TestStreamableHTTPTransport_ChunkedTransferEncoding(t *testing.T) {
 		RequestTimeout: 5 * time.Second,
 	}
 
-	transport, err := NewStreamableHTTPTransport(ctx, config)
+	transport, err := NewStreamableHTTPTransportWithConfig(ctx, config)
 	require.NoError(t, err)
 	defer transport.Close()
 
@@ -492,7 +492,7 @@ func TestStreamableHTTPTransport_SSEHeartbeat(t *testing.T) {
 		RequestTimeout: 5 * time.Second,
 	}
 
-	transport, err := NewStreamableHTTPTransport(ctx, config)
+	transport, err := NewStreamableHTTPTransportWithConfig(ctx, config)
 	require.NoError(t, err)
 	defer transport.Close()
 
@@ -534,7 +534,7 @@ func TestStreamableHTTPTransport_ErrorHandling(t *testing.T) {
 			MessageBuffer:  10,
 			RequestTimeout: 1 * time.Second,
 		}
-		transport, err := NewStreamableHTTPTransport(ctx, config)
+		transport, err := NewStreamableHTTPTransportWithConfig(ctx, config)
 		require.NoError(t, err)
 		
 		respChan, err := transport.SendRequest("test", nil)
@@ -550,7 +550,7 @@ func TestStreamableHTTPTransport_ErrorHandling(t *testing.T) {
 
 		// Test timeout
 		config.ClientEndpoint = server.URL + "/timeout"
-		transport, err = NewStreamableHTTPTransport(ctx, config)
+		transport, err = NewStreamableHTTPTransportWithConfig(ctx, config)
 		require.NoError(t, err)
 		
 		respChan, err = transport.SendRequest("test", nil)
@@ -581,7 +581,7 @@ func TestStreamableHTTPTransport_ErrorHandling(t *testing.T) {
 			RequestTimeout: 1 * time.Second,
 		}
 
-		transport, err := NewStreamableHTTPTransport(ctx, config)
+		transport, err := NewStreamableHTTPTransportWithConfig(ctx, config)
 		require.NoError(t, err)
 		defer transport.Close()
 
@@ -644,7 +644,7 @@ func TestStreamableHTTPTransport_CORS(t *testing.T) {
 		RequestTimeout: 5 * time.Second,
 	}
 
-	transport, err := NewStreamableHTTPTransport(ctx, config)
+	transport, err := NewStreamableHTTPTransportWithConfig(ctx, config)
 	require.NoError(t, err)
 	defer transport.Close()
 
@@ -736,7 +736,7 @@ func TestStreamableHTTPTransport_TypeScriptCompatibility(t *testing.T) {
 		TypeScriptCompatibility: true,
 	}
 
-	transport, err := NewStreamableHTTPTransport(ctx, config)
+	transport, err := NewStreamableHTTPTransportWithConfig(ctx, config)
 	require.NoError(t, err)
 	defer transport.Close()
 
@@ -805,7 +805,7 @@ func BenchmarkStreamableHTTPTransport_Throughput(b *testing.B) {
 		ConnectionPoolSize:    100,
 	}
 
-	transport, err := NewStreamableHTTPTransport(ctx, config)
+	transport, err := NewStreamableHTTPTransportWithConfig(ctx, config)
 	require.NoError(b, err)
 	defer transport.Close()
 

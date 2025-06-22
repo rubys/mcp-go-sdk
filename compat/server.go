@@ -154,7 +154,7 @@ func (s *MCPServer) CreateWithSSE(ctx context.Context, sseEndpoint, httpEndpoint
 
 // CreateWithStreamableHTTP creates a server with streamable HTTP transport (single endpoint)
 func (s *MCPServer) CreateWithStreamableHTTP(ctx context.Context, endpoint string) error {
-	streamTransport, err := transport.NewStreamableHTTPTransport(ctx, transport.StreamableHTTPConfig{
+	streamTransport, err := transport.NewStreamableHTTPTransportWithConfig(ctx, transport.StreamableHTTPConfig{
 		ClientEndpoint:        endpoint,  // Single endpoint for streamable HTTP
 		RequestTimeout:        s.config.requestTimeout,
 		MaxConcurrentRequests: s.config.maxConcurrentRequests,

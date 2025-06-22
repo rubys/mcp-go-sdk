@@ -22,6 +22,20 @@ type ClientConfig struct {
 	Capabilities shared.ClientCapabilities
 }
 
+// New creates a new MCP client with just transport
+func New(transport transport.Transport) *Client {
+	return &Client{
+		transport: transport,
+		config: ClientConfig{
+			ClientInfo: shared.ClientInfo{
+				Name:    "mcp-go-client",
+				Version: "1.0.0",
+			},
+			Capabilities: shared.ClientCapabilities{},
+		},
+	}
+}
+
 // NewClient creates a new MCP client with generic transport interface
 func NewClient(ctx context.Context, transport transport.Transport, config ClientConfig) (*Client, error) {
 	client := &Client{
@@ -36,6 +50,21 @@ func NewClient(ctx context.Context, transport transport.Transport, config Client
 	}
 
 	return client, nil
+}
+
+// Start starts the client transport and initializes the connection
+func (c *Client) Start(ctx context.Context) error {
+	c.ctx = ctx
+	
+	// Start the transport if it has a Start method
+	if starter, ok := c.transport.(interface{ Start(context.Context) error }); ok {
+		if err := starter.Start(ctx); err != nil {
+			return fmt.Errorf("failed to start transport: %w", err)
+		}
+	}
+	
+	// Initialize the connection
+	return c.Initialize(ctx)
 }
 
 // Initialize initializes the connection with the server
@@ -383,6 +412,11 @@ func (c *Client) GetPrompt(ctx context.Context, request shared.GetPromptRequest)
 // Close closes the client connection
 func (c *Client) Close() error {
 	return c.transport.Close()
+}
+
+// GetTransport returns the underlying transport
+func (c *Client) GetTransport() transport.Transport {
+	return c.transport
 }
 
 // Helper function to safely get string from map

@@ -17,6 +17,9 @@ import (
 	"github.com/rubys/mcp-go-sdk/shared"
 )
 
+// StreamableHTTP is a type alias for backward compatibility
+type StreamableHTTP = StreamableHTTPTransport
+
 // StreamableHTTPTransport implements the Streamable HTTP transport with SSE support
 type StreamableHTTPTransport struct {
 	// HTTP configuration
@@ -65,6 +68,11 @@ type StreamableHTTPTransport struct {
 	sseConnection   *http.Response
 	sseReader       *bufio.Scanner
 	sseMu           sync.RWMutex
+
+	// OAuth support
+	oauthHandler *OAuthHandler
+	oauthEnabled bool
+	oauthMu      sync.RWMutex
 }
 
 // StreamableHTTPConfig configures the Streamable HTTP transport
@@ -87,8 +95,18 @@ type StreamableHTTPConfig struct {
 	TLSConfig               interface{} // For future TLS configuration
 }
 
-// NewStreamableHTTPTransport creates a new Streamable HTTP transport
-func NewStreamableHTTPTransport(ctx context.Context, config StreamableHTTPConfig) (*StreamableHTTPTransport, error) {
+// NewStreamableHTTPTransport creates a new Streamable HTTP transport with a simple URL
+func NewStreamableHTTPTransport(url string) *StreamableHTTPTransport {
+	config := StreamableHTTPConfig{
+		ClientEndpoint: url,
+		EnableSSE:      false,
+	}
+	transport, _ := NewStreamableHTTPTransportWithConfig(context.Background(), config)
+	return transport
+}
+
+// NewStreamableHTTPTransportWithConfig creates a new Streamable HTTP transport
+func NewStreamableHTTPTransportWithConfig(ctx context.Context, config StreamableHTTPConfig) (*StreamableHTTPTransport, error) {
 	if config.ClientEndpoint == "" {
 		return nil, fmt.Errorf("client endpoint is required")
 	}
@@ -317,6 +335,22 @@ func (sht *StreamableHTTPTransport) sendHTTPRequest(data []byte) {
 		req.Header.Set("X-Session-ID", sht.sessionID)
 	}
 	
+	// Add OAuth authorization header if enabled
+	sht.oauthMu.RLock()
+	oauthEnabled := sht.oauthEnabled
+	oauthHandler := sht.oauthHandler
+	sht.oauthMu.RUnlock()
+	
+	if oauthEnabled && oauthHandler != nil {
+		authHeader, err := oauthHandler.GetAuthorizationHeader(sht.ctx)
+		if err != nil {
+			// Handle OAuth error - this might require authorization
+			atomic.AddInt64(&sht.httpErrors, 1)
+			return
+		}
+		req.Header.Set("Authorization", authHeader)
+	}
+	
 	// Add custom headers
 	for key, value := range sht.headers {
 		req.Header.Set(key, value)
@@ -417,6 +451,20 @@ func (sht *StreamableHTTPTransport) connectSSE() error {
 	// Add session ID if configured
 	if sht.sessionID != "" {
 		req.Header.Set("X-Session-ID", sht.sessionID)
+	}
+	
+	// Add OAuth authorization header if enabled
+	sht.oauthMu.RLock()
+	oauthEnabled := sht.oauthEnabled
+	oauthHandler := sht.oauthHandler
+	sht.oauthMu.RUnlock()
+	
+	if oauthEnabled && oauthHandler != nil {
+		authHeader, err := oauthHandler.GetAuthorizationHeader(sht.ctx)
+		if err != nil {
+			return fmt.Errorf("OAuth authorization failed: %w", err)
+		}
+		req.Header.Set("Authorization", authHeader)
 	}
 	
 	// Add custom headers
@@ -645,4 +693,35 @@ type StreamableHTTPTransportStats struct {
 // Port returns the port number (not applicable for client transport)
 func (sht *StreamableHTTPTransport) Port() int {
 	return 0 // Client transport doesn't have a port
+}
+
+// EnableOAuth enables OAuth authentication for the transport
+func (sht *StreamableHTTPTransport) EnableOAuth(handler *OAuthHandler) {
+	sht.oauthMu.Lock()
+	defer sht.oauthMu.Unlock()
+	sht.oauthHandler = handler
+	sht.oauthEnabled = true
+}
+
+// IsOAuthEnabled returns whether OAuth is enabled
+func (sht *StreamableHTTPTransport) IsOAuthEnabled() bool {
+	sht.oauthMu.RLock()
+	defer sht.oauthMu.RUnlock()
+	return sht.oauthEnabled
+}
+
+// GetOAuthHandler returns the OAuth handler if enabled
+func (sht *StreamableHTTPTransport) GetOAuthHandler() *OAuthHandler {
+	sht.oauthMu.RLock()
+	defer sht.oauthMu.RUnlock()
+	if sht.oauthEnabled {
+		return sht.oauthHandler
+	}
+	return nil
+}
+
+// Start starts the transport (no-op for StreamableHTTP as it starts automatically)
+func (sht *StreamableHTTPTransport) Start(ctx context.Context) error {
+	// Transport is already started in the constructor
+	return nil
 }
