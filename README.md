@@ -43,7 +43,7 @@ A high-performance, **concurrency-first** Go implementation of the [Model Contex
 go-sdk/
 ├── client/           # MCP client implementation
 ├── server/           # MCP server implementation with registries
-├── transport/        # Transport layer implementations (stdio, SSE, streamable HTTP, in-process, OAuth)
+├── transport/        # Transport layer implementations (stdio, SSE, streamable HTTP, in-process, OAuth 2.0)
 ├── shared/           # Common types and utilities
 ├── internal/         # Internal JSON-RPC message handling
 ├── compat/           # mark3labs/mcp-go compatibility layer
@@ -51,7 +51,7 @@ go-sdk/
 │   ├── compat_migration/  # Stdio migration example
 │   ├── sse_migration/     # SSE transport example
 │   └── stdio_server/      # Native API server example
-└── tests/           # Comprehensive test suite including concurrency, OAuth, and interoperability tests
+└── tests/           # Comprehensive test suite including concurrency, OAuth 2.0, SSE authentication, and interoperability tests
 ```
 
 ## 🏃 Quick Start
@@ -349,14 +349,15 @@ cd tests/typescript-interop && npx tsx test-go-server.ts
 - **Concurrent request handling**: Multiple simultaneous requests with worker pool validation
 - **Race condition detection**: Ensures thread safety with Go's race detector (5000+ concurrent operations)
 - **OAuth 2.0 authentication**: Complete OAuth flow testing with PKCE, token refresh, and error handling
+- **SSE OAuth integration**: Secure Server-Sent Events transport with OAuth 2.0 authentication
 - **In-process transport**: Direct client-server communication testing without network overhead
 - **Session management**: Multi-client isolation, per-session tool registration, and lifecycle testing
 - **Resource management**: Dynamic registration/removal with real-time notification testing
 - **Typed tool handlers**: Automatic argument marshaling with comprehensive type validation
 - **Meta field handling**: Progress token marshaling, nested objects, and concurrent access
 - **Timeout scenarios**: Proper handling of timeouts and cancellation across all transports
-- **High load testing**: Performance under stress (961 req/sec throughput achieved)
-- **TypeScript interoperability**: Full compatibility with TypeScript MCP SDK (10/10 tests pass)
+- **High load testing**: Performance under stress (12,265 req/sec throughput achieved)
+- **TypeScript interoperability**: Full compatibility with TypeScript MCP SDK (100% test pass rate)
 - **mark3labs compatibility**: Migration compatibility layer tests with fluent API validation
 - **Edge case testing**: Malformed data, unicode support, and error scenario handling
 - **Integration tests**: End-to-end functionality across all transports with comprehensive coverage

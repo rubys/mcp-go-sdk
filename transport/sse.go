@@ -24,6 +24,11 @@ type SSETransport struct {
 	maxReconnects     int
 	heartbeatInterval time.Duration
 
+	// OAuth configuration
+	oauthMu      sync.RWMutex
+	oauthHandler *OAuthHandler
+	oauthEnabled bool
+
 	// HTTP client for both SSE and POST
 	client     *http.Client
 	connection *http.Response
@@ -188,6 +193,21 @@ func (s *SSETransport) establishConnection() error {
 		req.Header.Set(key, value)
 	}
 
+	// Add OAuth authorization header if enabled
+	if s.IsOAuthEnabled() {
+		s.oauthMu.RLock()
+		handler := s.oauthHandler
+		s.oauthMu.RUnlock()
+		
+		if handler != nil {
+			authHeader, err := handler.GetAuthorizationHeader(s.ctx)
+			if err != nil {
+				return fmt.Errorf("failed to get OAuth authorization: %w", err)
+			}
+			req.Header.Set("Authorization", authHeader)
+		}
+	}
+
 	resp, err := s.client.Do(req)
 	if err != nil {
 		return fmt.Errorf("failed to connect: %w", err)
@@ -318,6 +338,21 @@ func (s *SSETransport) sendHTTPMessage(data []byte) error {
 		req.Header.Set(key, value)
 	}
 
+	// Add OAuth authorization header if enabled
+	if s.IsOAuthEnabled() {
+		s.oauthMu.RLock()
+		handler := s.oauthHandler
+		s.oauthMu.RUnlock()
+		
+		if handler != nil {
+			authHeader, err := handler.GetAuthorizationHeader(s.ctx)
+			if err != nil {
+				return fmt.Errorf("failed to get OAuth authorization: %w", err)
+			}
+			req.Header.Set("Authorization", authHeader)
+		}
+	}
+
 	resp, err := s.client.Do(req)
 	if err != nil {
 		return fmt.Errorf("failed to send HTTP request: %w", err)
@@ -351,11 +386,36 @@ func (s *SSETransport) Stats() interface{} {
 	}
 }
 
+// EnableOAuth enables OAuth authentication for this transport
+func (s *SSETransport) EnableOAuth(handler *OAuthHandler) {
+	s.oauthMu.Lock()
+	defer s.oauthMu.Unlock()
+	s.oauthHandler = handler
+	s.oauthEnabled = true
+}
+
+// IsOAuthEnabled returns true if OAuth is enabled
+func (s *SSETransport) IsOAuthEnabled() bool {
+	s.oauthMu.RLock()
+	defer s.oauthMu.RUnlock()
+	return s.oauthEnabled && s.oauthHandler != nil
+}
+
+// GetOAuthHandler returns the OAuth handler if enabled
+func (s *SSETransport) GetOAuthHandler() *OAuthHandler {
+	s.oauthMu.RLock()
+	defer s.oauthMu.RUnlock()
+	return s.oauthHandler
+}
+
 // Close gracefully shuts down the transport
 func (s *SSETransport) Close() error {
 	var err error
 	s.closeOnce.Do(func() {
 		s.cancel()
+		
+		// Allow some time for in-flight requests to complete
+		time.Sleep(10 * time.Millisecond)
 		
 		if s.connection != nil {
 			s.connection.Body.Close()
