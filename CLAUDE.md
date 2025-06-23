@@ -118,7 +118,7 @@ cd tests/typescript-interop && npx tsx test-go-server.ts
 go-sdk/
 ├── client/         # Client-side implementation
 ├── server/         # Server-side implementation  
-├── transport/      # Transport implementations (stdio, SSE, Streamable HTTP)
+├── transport/      # Transport implementations (stdio, SSE, Streamable HTTP, WebSocket)
 ├── shared/         # Common types and utilities
 ├── internal/       # Internal packages (not for external use)
 ├── compat/         # mark3labs/mcp-go compatibility layer
@@ -250,16 +250,19 @@ The implementation must maintain full compatibility with the MCP protocol while 
 - **Resource Management**: Dynamic registration/removal with real-time notification testing
 - **Typed Tool Handlers**: Generic type-safe handlers with automatic argument marshaling and validation
 - **Meta Field Handling**: Progress token marshaling, nested objects, and concurrent access testing
-- **Advanced Progress Notifications**: Complete TypeScript SDK compatibility with timeout management
-- **URI Template Support**: RFC 6570 compliant URI template parsing and expansion
+- **Advanced Progress Notifications**: Complete TypeScript SDK compatibility with timeout management and resetTimeoutOnProgress
+- **URI Template Support**: RFC 6570 compliant URI template parsing, expansion, and matching
+- **Protocol Version Negotiation**: Complete version negotiation with fallback and compatibility testing
+- **WebSocket Transport**: Full WebSocket implementation with reconnection, ping/pong, and concurrent messaging
+- **Transport Resumability**: Event store integration, session persistence, and connection recovery
 - **Race Condition Tests**: Extensive concurrent operation testing with Go's race detector (5000+ operations)
-- **Complete Test Coverage**: All transport types (stdio, SSE, HTTP, in-process) with race detection
+- **Complete Test Coverage**: All transport types (stdio, SSE, HTTP, WebSocket, in-process) with race detection
 - **mark3labs Compatibility**: Complete test coverage for migration compatibility layer
 - **Edge Case Testing**: Malformed data, unicode support, and comprehensive error scenario handling
 
 **Test Suite Statistics**:
-- **3,200+ lines** of comprehensive test code
-- **10 new test files** with specialized testing focus
+- **4,800+ lines** of comprehensive test code
+- **12 new test files** with specialized testing focus
 - **100% race-condition free** with concurrent validation
 - **Full compatibility** with TypeScript MCP SDK (10/10 tests pass)
 - **Complete feature parity** with TypeScript SDK advanced features
@@ -268,11 +271,12 @@ The implementation must maintain full compatibility with the MCP protocol while 
 ## Future Enhancements
 
 Areas for potential improvement:
-- WebSocket transport for persistent connections
 - gRPC transport for better performance
 - Distributed tracing support
 - Metrics export (Prometheus format)
 - Circuit breaker patterns for resilience
+- Authentication middleware enhancements
+- Resource template support
 
 ## Questions to Consider
 
