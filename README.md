@@ -4,6 +4,7 @@ A high-performance, **concurrency-first** Go implementation of the [Model Contex
 
 ## 📚 Documentation
 
+- **[API Documentation](docs/API.md)** - Comprehensive API reference for all packages and functions
 - **[Migration Guide](docs/MIGRATION_GUIDE.md)** - Complete guide for migrating from TypeScript SDK
 - **[Examples & Tutorials](docs/EXAMPLES.md)** - Practical examples and working code
 - **[Performance Comparison](docs/PERFORMANCE_COMPARISON.md)** - Detailed benchmarks and optimization strategies
