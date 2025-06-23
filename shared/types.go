@@ -7,8 +7,15 @@ import (
 
 // Protocol version constants
 const (
-	ProtocolVersion = "2024-11-05"
+	ProtocolVersion        = "2024-11-05"
+	LATEST_PROTOCOL_VERSION = "2024-11-05"
 )
+
+// Supported protocol versions (newest first)
+var SUPPORTED_PROTOCOL_VERSIONS = []string{
+	"2024-11-05",
+	"2024-10-07",
+}
 
 // Message types for JSON-RPC
 type MessageType string
@@ -66,14 +73,16 @@ type Response struct {
 
 // Implementation represents implementation metadata
 type Implementation struct {
-	Name    string `json:"name"`
-	Version string `json:"version"`
+	Name            string `json:"name"`
+	Version         string `json:"version"`
+	ProtocolVersion string `json:"protocolVersion,omitempty"`
 }
 
 // ClientCapabilities represents client capabilities
 type ClientCapabilities struct {
 	Experimental map[string]interface{} `json:"experimental,omitempty"`
 	Sampling     *SamplingCapability    `json:"sampling,omitempty"`
+	Roots        *RootsCapability       `json:"roots,omitempty"`
 }
 
 // ServerCapabilities represents server capabilities
@@ -83,6 +92,7 @@ type ServerCapabilities struct {
 	Prompts      *PromptsCapability     `json:"prompts,omitempty"`
 	Resources    *ResourcesCapability   `json:"resources,omitempty"`
 	Tools        *ToolsCapability       `json:"tools,omitempty"`
+	Completions  *CompletionsCapability `json:"completions,omitempty"`
 }
 
 // SamplingCapability represents sampling capabilities
@@ -104,6 +114,14 @@ type ResourcesCapability struct {
 
 // ToolsCapability represents tools capabilities
 type ToolsCapability struct {
+	ListChanged bool `json:"listChanged,omitempty"`
+}
+
+// CompletionsCapability represents completions capabilities
+type CompletionsCapability struct{}
+
+// RootsCapability represents roots capabilities
+type RootsCapability struct {
 	ListChanged bool `json:"listChanged,omitempty"`
 }
 
