@@ -530,7 +530,8 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
-- [Model Context Protocol](https://github.com/modelcontextprotocol/typescript-sdk) - Original TypeScript implementation
+- [Model Context Protocol](https://modelcontextprotocol.io/) - Protocol specification and ecosystem
+- [TypeScript MCP SDK](https://github.com/modelcontextprotocol/typescript-sdk) - Original reference implementation that provided compatibility targets and performance baselines
 - [mark3labs/mcp-go](https://github.com/mark3labs/mcp-go) - Popular Go MCP SDK that inspired our compatibility layer
 - Go community for excellent concurrency primitives and patterns
 
