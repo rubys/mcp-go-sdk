@@ -85,7 +85,10 @@ When adding new features:
 
 ### Running Tests
 ```bash
-# Basic tests
+# Basic tests (skips long-running tests)
+go test -short ./...
+
+# Full test suite including integration tests
 go test ./...
 
 # Race detection (required for all changes)
@@ -96,6 +99,72 @@ go test -bench=. ./...
 
 # TypeScript interoperability tests  
 cd tests/typescript-interop && npx tsx test-go-server.ts
+```
+
+### Test Coverage and Known Limitations
+
+#### Skipped Tests Analysis
+The test suite includes some intentionally skipped tests due to external dependencies and race conditions:
+
+**🚨 WebSocket Transport Tests (5 tests skipped)**
+- **File**: `transport/websocket_test.go`
+- **Reason**: Race conditions in gorilla/websocket library during cleanup
+- **Impact**: Core WebSocket functionality is not automatically tested
+- **Tests Affected**:
+  - `TestWebSocketTransport_SendRequest`
+  - `TestWebSocketTransport_SendNotification`
+  - `TestWebSocketTransport_Reconnection`
+  - `TestWebSocketTransport_ConcurrentRequests`
+  - `TestWebSocketTransport_DefaultConfiguration`
+
+**⚠️ Resumable Transport Tests (2 tests skipped)**
+- **File**: `transport/resumable_test.go`
+- **Reason**: Race conditions in test event handlers
+- **Impact**: Connection resumption features not validated in CI
+- **Tests Affected**:
+  - `TestResumableTransport_ConnectionResuption`
+  - `TestResumableTransport_InFlightRequestHandling`
+
+**📦 Process Transport Tests (conditional skip)**
+- **File**: `client/process_test.go`
+- **Reason**: Skipped in short mode (`-short` flag) or missing Node.js
+- **Impact**: Process spawning tests require full test run
+- **Workaround**: Run `go test -v ./client` without `-short` flag
+
+**🔄 Integration Tests (conditional skip)**
+- **Files**: Various interoperability and stress tests
+- **Reason**: Skipped in short mode to speed up regular CI runs
+- **Impact**: Full TypeScript compatibility requires manual validation
+- **Workaround**: Run full test suite without `-short` flag
+
+#### Test Coverage Strategy
+Despite skipped tests, core functionality remains fully tested:
+
+✅ **Well Tested Areas**:
+- Stdio transport (comprehensive race detection)
+- SSE transport with OAuth authentication
+- HTTP transport with connection pooling
+- In-process transport for testing
+- Request/response correlation
+- Progress notifications
+- TypeScript SDK compatibility (manual validation)
+
+❌ **Testing Gaps**:
+- WebSocket transport reliability under load
+- Resumable transport failure scenarios
+- Automated WebSocket interoperability
+
+#### Running Comprehensive Tests
+```bash
+# Run all tests including skipped ones (manual execution)
+go test -v ./transport/websocket_test.go  # Manual WebSocket testing
+go test -v ./transport/resumable_test.go  # Manual resumable testing
+
+# Full integration test suite
+go test -v ./...  # Includes process and integration tests
+
+# Stress testing and race detection
+go test -race -v ./... | grep -v "SKIP"
 ```
 
 ## Common Pitfalls to Avoid
