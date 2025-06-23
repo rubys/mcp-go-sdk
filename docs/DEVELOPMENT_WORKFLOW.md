@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="../logo.svg" alt="Go MCP SDK Logo" width="120" height="104" />
+</p>
+
 # Development Workflow with Claude Code and Go MCP SDK
 
 A practical guide for using Claude Code effectively throughout the development lifecycle with the Go MCP SDK.

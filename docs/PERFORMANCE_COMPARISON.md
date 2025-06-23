@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="../logo.svg" alt="Go MCP SDK Logo" width="120" height="104" />
+</p>
+
 # Performance Comparison: Go SDK vs TypeScript SDK
 
 Comprehensive performance analysis demonstrating the Go SDK's superior performance characteristics.

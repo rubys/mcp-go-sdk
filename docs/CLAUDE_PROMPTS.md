@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="../logo.svg" alt="Go MCP SDK Logo" width="120" height="104" />
+</p>
+
 # Claude Code Prompt Templates for Go MCP SDK
 
 Ready-to-use prompt templates for developing with the Go MCP SDK using Claude Code.

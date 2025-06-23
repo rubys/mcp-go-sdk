@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="../logo.svg" alt="Go MCP SDK Logo" width="120" height="104" />
+</p>
+
 # MCP Go SDK Examples
 
 Comprehensive examples showing how to build MCP servers and clients with the Go SDK.
