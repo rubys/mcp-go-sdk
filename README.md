@@ -9,6 +9,12 @@ A high-performance, **concurrency-first** Go implementation of the [Model Contex
 - **[Examples & Tutorials](docs/EXAMPLES.md)** - Practical examples and working code
 - **[Performance Comparison](docs/PERFORMANCE_COMPARISON.md)** - Detailed benchmarks and optimization strategies
 
+### 🤖 Claude Code Developer Resources
+
+- **[Claude Code Guide](docs/CLAUDE_CODE_GUIDE.md)** - Comprehensive guide for using Claude Code with the Go MCP SDK
+- **[Prompt Templates](docs/CLAUDE_PROMPTS.md)** - Ready-to-use prompts for development, migration, and optimization
+- **[Development Workflow](docs/DEVELOPMENT_WORKFLOW.md)** - Practical workflow for development lifecycle with Claude Code
+
 ## 🚀 Key Features
 
 ### **Concurrency-First Design**
