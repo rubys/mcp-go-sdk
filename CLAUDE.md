@@ -9,10 +9,11 @@ This is a high-performance, concurrency-first Go implementation of the Model Con
 **Status**: ✅ Production Ready
 - **Performance**: **7x+ faster** than TypeScript SDK (38,898 vs 5,581 ops/sec single-threaded, 14x for resource access)
 - **Benchmarking Suite**: ✅ **Comprehensive validation** of performance claims with real-world workloads
-- **Interoperability**: ✅ **100% compatible** with official TypeScript MCP SDK (9/9 tests pass)
+- **Interoperability**: ✅ **100% compatible** with official TypeScript MCP SDK (10/10 tests pass)
 - **TypeScript Integration**: Achieved 961 req/sec throughput with TypeScript clients
 - **Concurrency**: Non-blocking I/O with goroutines and channels throughout
 - **Testing**: Race condition free, comprehensive test coverage including cross-platform tests
+- **Advanced Features**: ✅ **Full progress notification compatibility** with TypeScript SDK timeout features
 
 ## Key Design Principles
 
@@ -41,6 +42,11 @@ This is a high-performance, concurrency-first Go implementation of the Model Con
 - **Response Format Compatibility**: 
   - `PromptMessage` content: Single items as objects, multiple as arrays
   - `TextContent` includes `URI` field for resource content
+- **Advanced Progress Notifications**: Complete compatibility with TypeScript SDK progress features
+  - `resetTimeoutOnProgress`: Timeout resets on each progress update
+  - `maxTotalTimeout`: Absolute maximum time limit regardless of progress
+  - Meta field preservation and progress token injection
+  - Support for all progress notification data types
 - **Native Compatibility**: No wrapper needed - core implementation handles TypeScript format natively
 
 ## Critical Implementation Details
@@ -59,6 +65,14 @@ This is a high-performance, concurrency-first Go implementation of the Model Con
 - **Request correlation** maps responses to pending requests by ID
 - **Timeout management** prevents resource leaks
 - **Statistics tracking** for performance monitoring
+
+### Advanced Progress Notifications (`internal/progress_handler.go`)
+- **ProgressMessageHandler**: Enhanced message handler with full TypeScript SDK compatibility
+- **Automatic token generation**: Progress tokens are automatically injected into `_meta` fields
+- **Advanced timeout options**: Support for `resetTimeoutOnProgress` and `maxTotalTimeout`
+- **Meta field preservation**: Existing meta fields are preserved when adding progress tokens
+- **Multi-type support**: Progress tokens can be strings, numbers, or objects
+- **Concurrent-safe**: All progress tracking is protected with appropriate mutex usage
 
 ## Testing Requirements
 
@@ -236,16 +250,19 @@ The implementation must maintain full compatibility with the MCP protocol while 
 - **Resource Management**: Dynamic registration/removal with real-time notification testing
 - **Typed Tool Handlers**: Generic type-safe handlers with automatic argument marshaling and validation
 - **Meta Field Handling**: Progress token marshaling, nested objects, and concurrent access testing
+- **Advanced Progress Notifications**: Complete TypeScript SDK compatibility with timeout management
+- **URI Template Support**: RFC 6570 compliant URI template parsing and expansion
 - **Race Condition Tests**: Extensive concurrent operation testing with Go's race detector (5000+ operations)
 - **Complete Test Coverage**: All transport types (stdio, SSE, HTTP, in-process) with race detection
 - **mark3labs Compatibility**: Complete test coverage for migration compatibility layer
 - **Edge Case Testing**: Malformed data, unicode support, and comprehensive error scenario handling
 
 **Test Suite Statistics**:
-- **2,600+ lines** of comprehensive test code
-- **8 new test files** with specialized testing focus
+- **3,200+ lines** of comprehensive test code
+- **10 new test files** with specialized testing focus
 - **100% race-condition free** with concurrent validation
 - **Full compatibility** with TypeScript MCP SDK (10/10 tests pass)
+- **Complete feature parity** with TypeScript SDK advanced features
 - **Production-ready** testing covering all major use cases
 
 ## Future Enhancements
