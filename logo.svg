@@ -1,0 +1,25 @@
+<svg viewBox="0 0 150 130" xmlns="http://www.w3.org/2000/svg">
+  <!-- Central hexagon -->
+  <polygon points="75,45 95,55 95,75 75,85 55,75 55,55" fill="#00ADD8" stroke="#007B9F" stroke-width="2"/>
+  <text x="75" y="70" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white" font-weight="bold">MCP</text>
+  
+  <!-- Surrounding hexagons for concurrency -->
+  <polygon points="75,15 90,22 90,37 75,44 60,37 60,22" fill="#76D7EA" stroke="#00ADD8" stroke-width="1"/>
+  <polygon points="105,30 120,37 120,52 105,59 90,52 90,37" fill="#76D7EA" stroke="#00ADD8" stroke-width="1"/>
+  <polygon points="105,70 120,77 120,92 105,99 90,92 90,77" fill="#76D7EA" stroke="#00ADD8" stroke-width="1"/>
+  <polygon points="75,85 90,92 90,107 75,114 60,107 60,92" fill="#76D7EA" stroke="#00ADD8" stroke-width="1"/>
+  <polygon points="45,70 60,77 60,92 45,99 30,92 30,77" fill="#76D7EA" stroke="#00ADD8" stroke-width="1"/>
+  <polygon points="45,30 60,37 60,52 45,59 30,52 30,37" fill="#76D7EA" stroke="#00ADD8" stroke-width="1"/>
+  
+  <!-- Connection lines -->
+  <g stroke="#007B9F" stroke-width="1" opacity="0.6">
+    <line x1="75" y1="45" x2="75" y2="37"/>
+    <line x1="75" y1="45" x2="90" y2="37"/>
+    <line x1="75" y1="45" x2="90" y2="52"/>
+    <line x1="75" y1="85" x2="90" y2="77"/>
+    <line x1="75" y1="85" x2="75" y2="92"/>
+    <line x1="75" y1="45" x2="60" y2="37"/>
+    <line x1="75" y1="45" x2="60" y2="52"/>
+    <line x1="75" y1="85" x2="60" y2="77"/>
+  </g>
+</svg>

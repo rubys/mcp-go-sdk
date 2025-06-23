@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="logo.svg" alt="Go MCP SDK Logo" width="150" height="130" />
+</p>
+
 # Go SDK for Model Context Protocol (MCP)
 
 A high-performance, **concurrency-first** Go implementation of the [Model Context Protocol](https://github.com/modelcontextprotocol/typescript-sdk), delivering **7x+ better performance** than the TypeScript SDK with **100% compatibility**.

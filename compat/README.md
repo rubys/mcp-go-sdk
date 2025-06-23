@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="../logo.svg" alt="Go MCP SDK Logo" width="100" height="87" />
+</p>
+
 # Compatibility Layer for mark3labs/mcp-go
 
 This package provides a compatibility layer that mimics the mark3labs/mcp-go API while leveraging the high-performance, concurrency-first implementation of this SDK.

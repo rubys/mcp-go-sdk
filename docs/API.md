@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="../logo.svg" alt="Go MCP SDK Logo" width="120" height="104" />
+</p>
+
 # Go MCP SDK API Documentation
 
 Comprehensive API reference for the high-performance Go MCP SDK.
