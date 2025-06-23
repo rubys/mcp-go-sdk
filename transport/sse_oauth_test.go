@@ -417,15 +417,26 @@ func (m *MockRefreshTokenStore) SaveToken(token *Token) error {
 
 func (m *MockRefreshTokenStore) GetToken() (*Token, error) {
 	m.mu.RLock()
-	defer m.mu.RUnlock()
 	
-	// If token is expired and we haven't refreshed yet, return refreshed token
-	if m.currentToken != nil && m.currentToken.IsExpired() && !m.refreshed {
-		m.refreshed = true
+	// Check if we need to refresh
+	needsRefresh := m.currentToken != nil && m.currentToken.IsExpired() && !m.refreshed
+	if !needsRefresh {
+		defer m.mu.RUnlock()
+		return m.currentToken, nil
+	}
+	
+	// Upgrade to write lock for refresh
+	m.mu.RUnlock()
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	
+	// Double-check after acquiring write lock
+	if m.refreshed {
 		return m.refreshedToken, nil
 	}
 	
-	return m.currentToken, nil
+	m.refreshed = true
+	return m.refreshedToken, nil
 }
 
 // TestSSEOAuthDisabled tests transport behavior when OAuth is not enabled

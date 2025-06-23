@@ -31,6 +31,7 @@ type SSETransport struct {
 
 	// HTTP client for both SSE and POST
 	client     *http.Client
+	connMu     sync.RWMutex // Protects connection and reader
 	connection *http.Response
 	reader     *bufio.Scanner
 
@@ -218,8 +219,10 @@ func (s *SSETransport) establishConnection() error {
 		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
+	s.connMu.Lock()
 	s.connection = resp
 	s.reader = bufio.NewScanner(resp.Body)
+	s.connMu.Unlock()
 	atomic.StoreInt64(&s.connected, 1)
 
 	return nil
@@ -228,20 +231,32 @@ func (s *SSETransport) establishConnection() error {
 // readEvents reads SSE events
 func (s *SSETransport) readEvents() {
 	defer func() {
-		if s.connection != nil {
-			s.connection.Body.Close()
+		s.connMu.RLock()
+		conn := s.connection
+		s.connMu.RUnlock()
+		if conn != nil {
+			conn.Body.Close()
 		}
 		atomic.StoreInt64(&s.connected, 0)
 	}()
 
-	for s.reader.Scan() {
+	// Get reader reference under lock
+	s.connMu.RLock()
+	reader := s.reader
+	s.connMu.RUnlock()
+	
+	if reader == nil {
+		return
+	}
+
+	for reader.Scan() {
 		select {
 		case <-s.ctx.Done():
 			return
 		default:
 		}
 
-		line := s.reader.Text()
+		line := reader.Text()
 		
 		// Handle SSE event format
 		if strings.HasPrefix(line, "data: ") {
@@ -287,7 +302,7 @@ func (s *SSETransport) readEvents() {
 	}
 
 	// Connection closed or error
-	if err := s.reader.Err(); err != nil {
+	if err := reader.Err(); err != nil {
 		atomic.AddInt64(&s.connectionErrors, 1)
 	}
 }
@@ -417,8 +432,11 @@ func (s *SSETransport) Close() error {
 		// Allow some time for in-flight requests to complete
 		time.Sleep(10 * time.Millisecond)
 		
-		if s.connection != nil {
-			s.connection.Body.Close()
+		s.connMu.RLock()
+		conn := s.connection
+		s.connMu.RUnlock()
+		if conn != nil {
+			conn.Body.Close()
 		}
 		
 		if s.messageHandler != nil {
