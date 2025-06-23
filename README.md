@@ -53,21 +53,35 @@ A high-performance, **concurrency-first** Go implementation of the [Model Contex
 ## 📦 Project Structure
 
 ```
-go-sdk/
-├── client/           # MCP client implementation
-├── server/           # MCP server implementation with registries
-├── transport/        # Transport layer implementations (stdio, SSE, streamable HTTP, in-process, OAuth 2.0)
-├── shared/           # Common types and utilities
-├── internal/         # Internal JSON-RPC message handling
-├── compat/           # mark3labs/mcp-go compatibility layer
-├── benchmarks/       # Comprehensive performance benchmarking suite
-│   ├── cmd/         # Benchmark runner and reporting tools
-│   └── *.go         # Performance tests and TypeScript SDK comparisons
-├── examples/         # Example implementations and demos
-│   ├── compat_migration/  # Stdio migration example
-│   ├── sse_migration/     # SSE transport example
-│   └── stdio_server/      # Native API server example
-└── tests/           # Comprehensive test suite including concurrency, OAuth 2.0, SSE authentication, and interoperability tests
+mcp-go-sdk/
+├── client/              # MCP client implementation with OAuth and process support
+├── server/              # MCP server implementation with registries and session management
+├── transport/           # Transport layer implementations (stdio, SSE, WebSocket, streamable HTTP, in-process, OAuth 2.0)
+├── shared/              # Common types, utilities, and URI template support
+├── internal/            # Internal JSON-RPC message handling and progress notifications
+├── compat/              # mark3labs/mcp-go compatibility layer with fluent API
+├── benchmarks/          # Comprehensive performance benchmarking suite
+│   ├── cmd/            # Benchmark runner and reporting tools
+│   └── *.go            # Performance tests and TypeScript SDK comparisons
+├── examples/            # Example implementations and demos
+│   ├── client_example/  # Basic client usage example
+│   ├── compat_migration/# mark3labs compatibility migration example
+│   ├── progress_demo/   # TypeScript interop with progress notifications
+│   ├── sse_migration/   # SSE transport migration example
+│   └── stdio_server/    # Native API server example
+├── tests/               # Comprehensive test suite and TypeScript interoperability
+│   └── typescript-interop/  # Cross-platform compatibility tests
+├── docs/                # Complete documentation suite
+│   ├── API.md          # Comprehensive API reference
+│   ├── EXAMPLES.md     # Practical examples and tutorials
+│   ├── MIGRATION_GUIDE.md    # TypeScript to Go migration guide
+│   ├── PERFORMANCE_COMPARISON.md  # Detailed benchmarks and metrics
+│   ├── CLAUDE_CODE_GUIDE.md      # Claude Code development guide
+│   ├── CLAUDE_PROMPTS.md         # Ready-to-use prompt templates
+│   └── DEVELOPMENT_WORKFLOW.md   # Development lifecycle workflow
+├── CLAUDE.md            # Development guide for AI assistants
+├── PRODUCTION.md        # Production deployment guide
+└── TEST_COVERAGE_PLAN.md # Test coverage implementation plan
 ```
 
 ## 🏃 Quick Start
